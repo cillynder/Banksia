@@ -174,11 +174,14 @@ class SheetStateWrapper(
             p1.value = target
             peek = peek1
         }
-        scope.launch {
-            state.animateTo(peek)
-            p1.value = target
-            p2.value = target
-            state.invalidateDetents()
-        }
+        state.invalidateDetents()
+        state.targetDetent = peek
+        // TODO: this is broken; animateTo never finishes
+        // scope.launch {
+        //     state.animateTo(peek)
+        //     p1.value = target
+        //     p2.value = target
+        //     state.invalidateDetents()
+        // }
     }
 }
