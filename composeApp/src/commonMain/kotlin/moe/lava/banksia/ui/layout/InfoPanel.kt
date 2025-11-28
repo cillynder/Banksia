@@ -7,13 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,8 +45,6 @@ fun InfoPanel(
         Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
-            .heightIn(max = 250.dp)
-            .verticalScroll(rememberScrollState())
             .onSizeChanged {
                 onPeekHeightChange(with(localDensity) { it.height.toDp().coerceAtMost(250.dp) })
             }
@@ -64,7 +59,7 @@ fun InfoPanel(
 
             if (state.loading)
                 CircularProgressIndicator(
-                    modifier = Modifier.width(32.dp).align(Alignment.CenterEnd)
+                    modifier = Modifier.size(32.dp).align(Alignment.TopEnd)
                 )
         }
         Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeContent))

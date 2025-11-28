@@ -12,6 +12,7 @@ androidx-lifecycle = "2.9.6"
 androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.9.3"
+composeunstyled = "1.49.2"
 coroutines = "1.10.2"
 geo = "0.8.0"
 junit = "4.13.2"
@@ -32,6 +33,7 @@ room = "2.8.4"
 secretsGradlePlugin = "2.0.1"
 
 [libraries]
+composeunstyled = { module = "com.composables:composeunstyled", version.ref = "composeunstyled" }
 moko-geo = { module = "dev.icerock.moko:geo", version.ref = "geo" }
 moko-geo-compose = { module = "dev.icerock.moko:geo-compose", version.ref = "geo" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
