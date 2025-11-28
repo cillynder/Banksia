@@ -65,7 +65,7 @@ fun AppBottomSheet(
             )
             .shadow(4.dp, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .fillMaxWidth()
             .imePadding(),
     ) {
