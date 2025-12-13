@@ -10,7 +10,7 @@ import java.io.File
 
 class JvmDatabaseBuilder() : PlatformDatabaseBuilder {
     override fun getBuilder(): RoomDatabase.Builder<Database> {
-        val dbFile = File(System.getProperty("java.io.tmpdir"), "my_room.db")
+        val dbFile = File("./data/room.db")
         return Room.databaseBuilder<Database>(
             name = dbFile.absolutePath,
         )
