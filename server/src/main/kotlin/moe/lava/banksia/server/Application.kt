@@ -95,10 +95,6 @@ fun Application.module() {
             else
                 call.respond(HttpStatusCode.NotFound)
         }
-        get("/debug.inc") {
-            gtfsr.debug = true
-            call.respondText("increment")
-        }
         get("/route_stops/{route_id}") {
             val routeId = call.parameters["route_id"]!!
             val useParent = call.queryParameters["parent"] in listOf("true", "1")

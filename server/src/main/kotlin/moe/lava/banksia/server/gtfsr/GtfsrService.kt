@@ -51,7 +51,6 @@ class GtfsrService(private val client: HttpClient) {
         )
     }
 
-    var debug = false
     suspend fun start() {
         if (started) {
             log("GtfsrService", "Tried to start when already started")
@@ -96,10 +95,8 @@ class GtfsrService(private val client: HttpClient) {
                     val time = Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault())
 
                     val base = File(BASE_DIR, type)
-//                    val previousParent = File(base, "${time.year}-${((time.dayOfYear - 1) / 7).toString().padStart(2, '0')}")
-//                    val currentParent = File(base, "${time.year}-${((time.dayOfYear - 1) / 7 + 1).toString().padStart(2, '0')}")
-                    val previousParent = if (!debug) File(base, "2025-50") else File(base, "2025-51")
-                    val currentParent = if (!debug) File(base, "2025-51") else File(base, "2025-52")
+                    val previousParent = File(base, "${time.year}-${((time.dayOfYear - 1) / 7).toString().padStart(2, '0')}")
+                    val currentParent = File(base, "${time.year}-${((time.dayOfYear - 1) / 7 + 1).toString().padStart(2, '0')}")
                     val target = File(currentParent, "${timestamp}.proto")
 
                     if (previousParent.isDirectory) {
