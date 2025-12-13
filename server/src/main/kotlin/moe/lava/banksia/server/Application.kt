@@ -1,6 +1,5 @@
 package moe.lava.banksia.server
 
-import io.ktor.client.HttpClient
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -22,6 +21,7 @@ import moe.lava.banksia.room.dao.RouteDao
 import moe.lava.banksia.room.dao.StopDao
 import moe.lava.banksia.server.di.ServerModules
 import moe.lava.banksia.server.gtfs.GtfsHandler
+import moe.lava.banksia.server.gtfsr.GtfsrService
 import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
@@ -40,7 +40,8 @@ fun Application.module() {
         modules(CommonModules, ServerModules)
     }
 
-    val client = HttpClient()
+    val gtfsr by inject<GtfsrService>()
+    launch { gtfsr.start() }
 
     routing {
         get("/update") {
@@ -93,6 +94,10 @@ fun Application.module() {
                 call.respond(stop.asModel())
             else
                 call.respond(HttpStatusCode.NotFound)
+        }
+        get("/debug.inc") {
+            gtfsr.debug = true
+            call.respondText("increment")
         }
         get("/route_stops/{route_id}") {
             val routeId = call.parameters["route_id"]!!

@@ -31,6 +31,7 @@ playServicesMaps = "19.2.0"
 sqlite = "2.6.2"
 room = "2.8.4"
 secretsGradlePlugin = "2.0.1"
+wire = "5.4.0"
 
 [libraries]
 composeunstyled = { module = "com.composables:composeunstyled", version.ref = "composeunstyled" }
@@ -87,3 +88,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 room = { id = "androidx.room", version.ref = "room" }
 secretsGradle = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin" }
+wire = { id = "com.squareup.wire", version.ref = "wire" }

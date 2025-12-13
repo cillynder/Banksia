@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.wire)
 }
 
 room {
@@ -73,4 +74,11 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
+}
+
+wire {
+    sourcePath {
+        srcDir("src/commonMain/proto")
+    }
+    kotlin {}
 }

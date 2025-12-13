@@ -3,6 +3,7 @@ package moe.lava.banksia
 object Constants {
     const val devid: String = ""
     const val key: String = ""
+    const val opendataKey: String = ""
     const val serverUrl: String = "https://banksia.lava.moe/api/"
     // TODO
     const val devMode: Boolean = false
