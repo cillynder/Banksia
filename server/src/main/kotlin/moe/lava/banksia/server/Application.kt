@@ -50,7 +50,7 @@ fun Application.module() {
                 return@get
             }
 
-            val datasetUuid = call.parameters["uuid"] ?: "e4966d78-dc64-4a1d-a751-2470c9eaf034"
+            val datasetUuid = call.parameters["uuid"] ?: "fb152201-859f-4882-9206-b768060b50ad"
             val datasetUrl = call.parameters["url"]
                 ?: "https://opendata.transport.vic.gov.au/dataset/3f4e292e-7f8a-4ffe-831f-1953be0fe448/resource/${datasetUuid}/download/gtfs.zip"
             call.respondText("received")
