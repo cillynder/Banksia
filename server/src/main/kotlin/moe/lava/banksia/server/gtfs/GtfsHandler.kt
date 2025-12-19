@@ -29,6 +29,8 @@ import moe.lava.banksia.server.gtfs.structures.GtfsTrip
 import moe.lava.banksia.util.Point
 import java.io.File
 import java.util.zip.ZipFile
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class GtfsHandler(
     private val log: Logger,
@@ -38,7 +40,8 @@ class GtfsHandler(
     private val csv = CsvFormat(StringDeferringConfig(EmptySerializersModule()))
     private val datasetPath = File("/tmp/banksia", "dataset.zip")
 
-    suspend fun update(datasetUrl: String) {
+    @OptIn(ExperimentalTime::class)
+    suspend fun update(datasetUrl: String, date: Long? = null) {
         val parentDir = datasetPath.parentFile
         @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
         if (parentDir.exists() && !Constants.devMode)
@@ -72,12 +75,20 @@ class GtfsHandler(
         addTrips(files)
         addStopTimes(files)
 
+        updateMetadata(date ?: Clock.System.now().epochSeconds)
+
         @Suppress("KotlinConstantConditions")
         if (!Constants.devMode) {
             parentDir.deleteRecursively()
         }
 
         log.info("done!")
+    }
+
+    private suspend fun updateMetadata(date: Long) {
+        val dao = db.versionMetadataDao
+        log.info("updating metadata...")
+        dao.update(date, listOf("routes", "stops", "shapes", "trips", "stop_times"))
     }
 
     private suspend fun addRoutes(files: List<File>) {

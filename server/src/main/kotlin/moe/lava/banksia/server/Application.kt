@@ -19,6 +19,7 @@ import moe.lava.banksia.Constants
 import moe.lava.banksia.di.CommonModules
 import moe.lava.banksia.room.dao.RouteDao
 import moe.lava.banksia.room.dao.StopDao
+import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.server.di.ServerModules
 import moe.lava.banksia.server.gtfs.GtfsHandler
 import moe.lava.banksia.server.gtfsr.GtfsrService
@@ -58,6 +59,22 @@ fun Application.module() {
             launch(context = Dispatchers.IO) {
                 val handler by inject<GtfsHandler>()
                 handler.update(datasetUrl)
+            }
+        }
+
+        get("/metadata/{type?}") {
+            val dao by inject<VersionMetadataDao>()
+            val type = call.parameters["type"]
+            if (type == null) {
+                call.respond(dao.getAll().map { it.asModel() })
+                return@get
+            }
+
+            val data = dao.get(type)?.asModel()
+            if (data == null) {
+                call.respond(HttpStatusCode.NotFound)
+            } else {
+                call.respond(data)
             }
         }
 
