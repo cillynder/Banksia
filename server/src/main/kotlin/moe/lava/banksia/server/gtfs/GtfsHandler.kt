@@ -150,9 +150,10 @@ class GtfsHandler(
             .groupBy { it.id }
             .forEach { (id, gstops) ->
                 if (gstops.size > 1) {
-//                    if (gstops.withIndex().any { (i, stop) -> i != 0 && stop == gstops[i - 1] })
-                    gstops.forEach {
-                        log.info("duplicate $id: $it")
+                    if (gstops.withIndex().any { (i, stop) -> i != 0 && stop != gstops[i - 1] }) {
+                        gstops.forEach {
+                            log.info("duplicate $id: $it")
+                        }
                     }
                 }
             }
