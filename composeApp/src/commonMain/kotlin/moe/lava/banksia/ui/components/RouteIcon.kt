@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import moe.lava.banksia.data.ptv.structures.PtvRouteType
@@ -33,7 +34,6 @@ import moe.lava.banksia.resources.tram_background
 import moe.lava.banksia.resources.tram_icon
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class RouteTypeProperties(
     val colour: Color,

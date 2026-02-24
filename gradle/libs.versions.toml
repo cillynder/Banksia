@@ -3,7 +3,7 @@ agp = "8.13.1"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
-androidx-activityCompose = "1.12.0"
+androidx-activityCompose = "1.12.4"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.2.1"
 androidx-core-ktx = "1.15.0"
@@ -11,29 +11,39 @@ androidx-espresso-core = "3.6.1"
 androidx-lifecycle = "2.9.6"
 androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
-compose-multiplatform = "1.9.3"
-composeunstyled = "1.49.2"
+compose-multiplatform = "1.11.0-alpha02"
+composeunstyled = "1.49.6"
 coroutines = "1.10.2"
 geo = "0.8.0"
 junit = "4.13.2"
 koin = "4.1.1"
-kotlin = "2.2.21"
+kotlin = "2.3.10"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationCsv = "0.2.18"
-kotlinxSerialization = "1.9.0"
-ksp = "2.3.3"
-ktor = "3.3.2"
-logback = "1.5.21"
+kotlinxSerialization = "1.10.0"
+ksp = "2.3.4"
+ktor = "3.4.0"
+logback = "1.5.32"
 mapsCompose = "6.12.2"
+material = "1.7.3"
+material3 = "1.11.0-alpha02"
 okio = "3.16.4"
 playServicesLocation = "21.3.0"
 playServicesMaps = "19.2.0"
 sqlite = "2.6.2"
 room = "2.8.4"
 secretsGradlePlugin = "2.0.1"
-wire = "5.4.0"
+wire = "5.5.0"
 
 [libraries]
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-material-icons-core = { module = "org.jetbrains.compose.material:material-icons-core", version.ref = "material" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
 composeunstyled = { module = "com.composables:composeunstyled", version.ref = "composeunstyled" }
 moko-geo = { module = "dev.icerock.moko:geo", version.ref = "geo" }
 moko-geo-compose = { module = "dev.icerock.moko:geo-compose", version.ref = "geo" }
