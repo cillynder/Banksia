@@ -1,25 +1,20 @@
+@file:Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
+
 package moe.lava.banksia.ui.platform.maps
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -27,28 +22,43 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.maps.android.compose.ComposeMapColorScheme
-import com.google.maps.android.compose.DefaultMapProperties
-import com.google.maps.android.compose.DefaultMapUiSettings
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MarkerComposable
-import com.google.maps.android.compose.Polyline
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.flow.Flow
-import moe.lava.banksia.R
-import moe.lava.banksia.ui.components.RouteIcon
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
+import moe.lava.banksia.model.RouteType
+import moe.lava.banksia.ui.components.getUIProperties
 import moe.lava.banksia.ui.platform.BanksiaTheme
+import moe.lava.banksia.ui.screens.MELBOURNE
 import moe.lava.banksia.ui.screens.MapScreenEvent
 import moe.lava.banksia.ui.state.MapState
 import moe.lava.banksia.util.BoxedValue
 import moe.lava.banksia.util.Point
+import moe.lava.banksia.util.log
+import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.expressions.dsl.case
+import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.convertToString
+import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.switch
+import org.maplibre.compose.layers.CircleLayer
+import org.maplibre.compose.map.MapOptions
+import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.map.OrnamentOptions
+import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.maplibre.compose.style.BaseStyle
+import org.maplibre.compose.util.ClickResult
+import org.maplibre.spatialk.geojson.BoundingBox
+import org.maplibre.spatialk.geojson.FeatureCollection
+import org.maplibre.spatialk.geojson.Position
+import org.maplibre.spatialk.geojson.dsl.addFeature
+import org.maplibre.spatialk.geojson.dsl.buildFeatureCollection
 
-fun Point.toLatLng(): LatLng = LatLng(this.lat, this.lng)
+import org.maplibre.compose.camera.CameraPosition as MLCameraPosition
+import org.maplibre.spatialk.geojson.Point as MLPoint
+
+fun Point.toPos(): Position = Position(this.lng, this.lat)
 
 @Composable
 private fun checkLocationPermission() =
@@ -62,6 +72,40 @@ actual fun getScreenHeight(): Int {
     }
 }
 
+@Serializable
+data class MarkerProps(
+    val type: RouteType,
+)
+
+private fun buildMarkers(markers: List<Marker>): FeatureCollection<MLPoint, MarkerProps> {
+    return buildFeatureCollection {
+        markers.forEach { marker ->
+            val type = when (marker) {
+                is Marker.Stop -> marker.type
+                is Marker.Vehicle -> marker.type
+            }
+            val id = when (marker) {
+                is Marker.Stop -> marker.id
+                is Marker.Vehicle -> marker.ref
+            }
+            addFeature(
+                geometry = MLPoint(marker.point.toPos()),
+                properties = MarkerProps(type),
+            ) {
+                setId(id)
+            }
+        }
+    }
+}
+
+private val colorTypeExpression @Composable get() = switch(
+    input = feature["type"].convertToString(),
+    cases = RouteType.entries.map {
+        case(label = it.name, output = const(it.getUIProperties().colour))
+    }.toTypedArray(),
+    fallback = const(BanksiaTheme.colors.surface),
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun Maps(
@@ -72,104 +116,110 @@ actual fun Maps(
     setLastKnownLocation: (Point) -> Unit,
     extInsets: WindowInsets,
 ) {
-    val camPos = rememberCameraPositionState()
+    val camPos = rememberCameraState(
+        MLCameraPosition(
+            zoom = 16.0,
+            target = MELBOURNE.toPos()
+        )
+    )
     val newCameraPos by cameraPositionFlow.collectAsStateWithLifecycle(null)
     LaunchedEffect(newCameraPos) {
+        log("maps", "newPos ${newCameraPos?.value}")
         val pos = newCameraPos?.value ?: return@LaunchedEffect
-        val update = if (pos.bounds != null) {
+        if (pos.bounds != null) {
             val (northeast, southwest) = pos.bounds
-            val bounds = LatLngBounds(
-                southwest.toLatLng(),
-                northeast.toLatLng()
+            camPos.animateTo(
+                boundingBox = BoundingBox(
+                    southwest.toPos(),
+                    northeast.toPos()
+                )
             )
-            CameraUpdateFactory.newLatLngBounds(bounds, 150)
-        } else
-            CameraUpdateFactory.newLatLngZoom(pos.centre.toLatLng(), 16.0f)
-
-        camPos.animate(update, 1000)
+        } else {
+            camPos.animateTo(MLCameraPosition(
+                target = pos.centre.toPos(),
+                zoom = 16.0,
+            ))
+        }
     }
 
     val ctx = LocalContext.current
     val fusedLocation = remember { LocationServices.getFusedLocationProviderClient(ctx) }
     LaunchedEffect(Unit) {
+        @SuppressLint("MissingPermission")
         fusedLocation.lastLocation.addOnSuccessListener {
             if (it != null) {
-                camPos.position = com.google.android.gms.maps.model.CameraPosition(
-                    LatLng(
-                        it.latitude,
-                        it.longitude
-                    ), 16.0f, 0.0f, 0.0f
+                camPos.position = MLCameraPosition(
+                    zoom = 16.0,
+                    target = Position(it.longitude, it.latitude)
                 )
                 setLastKnownLocation(Point(it.latitude, it.longitude))
             }
         }
     }
 
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = camPos,
-        mapColorScheme = if (isSystemInDarkTheme()) {
-            ComposeMapColorScheme.DARK
-        } else {
-            ComposeMapColorScheme.LIGHT
-        },
-        properties = DefaultMapProperties.copy(
-            mapStyleOptions = MapStyleOptions.loadRawResourceStyle(
-                LocalContext.current,
-                R.raw.def_mapstyle
-            ),
-            isMyLocationEnabled = checkLocationPermission(),
-        ),
-        uiSettings = DefaultMapUiSettings.copy(
-            zoomControlsEnabled = false,
-            myLocationButtonEnabled = false,
-            mapToolbarEnabled = false,
-        ),
-        contentPadding = WindowInsets.safeDrawing.add(extInsets).asPaddingValues()
+    MaplibreMap(
+        modifier = modifier,
+        baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/positron"),
+        cameraState = camPos,
+        options = MapOptions(
+            ornamentOptions = OrnamentOptions(
+                padding = WindowInsets.safeDrawing.add(extInsets).asPaddingValues(),
+                isScaleBarEnabled = false,
+                isAttributionEnabled = false,
+            )
+        )
     ) {
-        // [TODO]: Slight lag when routes with many stops such as the 901 bus is set
-        for (marker in state.stops) {
-            val state = rememberUpdatedMarkerState(marker.point.toLatLng())
-            MarkerComposable(
-                keys = arrayOf(marker),
-                zIndex = 0f,
-                state = state,
-                onClick = {
-                    onEvent(MapScreenEvent.SelectStop(marker.type to marker.id))
-                    false
+        if (state.stops.isNotEmpty()) {
+            val stopsSource = rememberGeoJsonSource(
+                GeoJsonData.Features(buildMarkers(state.stops))
+            )
+            CircleLayer(
+                id = "maps-stops0",
+                source = stopsSource,
+                color = const(BanksiaTheme.colors.surface),
+                radius = const(3.dp),
+                strokeWidth = const(2.dp),
+                strokeColor = colorTypeExpression,
+                onClick = { features ->
+                    val feature = features[0]
+                    val marker = Json.decodeFromJsonElement<MarkerProps>(feature.properties!!)
+                    onEvent(MapScreenEvent.SelectStop(marker.type to feature.id!!.content))
+                    ClickResult.Consume
                 }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(BanksiaTheme.colors.surface)
-                        .border(2.dp, marker.colour, CircleShape)
-                )
-            }
-        }
-        for (marker in state.vehicles) {
-            val state = rememberUpdatedMarkerState(marker.point.toLatLng())
-            MarkerComposable(
-                keys = arrayOf(marker),
-                zIndex = 1f,
-                state = state,
-                onClick = {
-                    onEvent(MapScreenEvent.SelectRun(marker.ref))
-                    false
-                }
-            ) {
-                RouteIcon(
-                    size = 30.dp,
-                    routeType = marker.type,
-                )
-            }
-        }
-        for (polyline in state.polylines) {
-            Polyline(
-                points = polyline.points.map { it.toLatLng() },
-                color = polyline.colour
             )
         }
+
+        // TODO
+//        if (state.vehicles.isNotEmpty()) {
+//            val stopsSource = rememberGeoJsonSource(
+//                GeoJsonData.Features(buildMarkers(state.vehicles))
+//            )
+//            SymbolLayer
+//            CircleLayer(
+//                id = "maps-vehicles0",
+//                source = stopsSource,
+//                color = const(BanksiaTheme.colors.surface),
+//                radius = const(3.dp),
+//                strokeWidth = const(2.dp),
+//                strokeColor = colorTypeExpression,
+//                onClick = { features ->
+//                    val feature = features[0]
+//                    val marker = Json.decodeFromJsonElement<MarkerProps>(feature.properties!!)
+//                    onEvent(MapScreenEvent.SelectStop(marker.type to feature.id!!.content))
+//                    ClickResult.Consume
+//                }
+//            )
+//        }
+//
+//        if (state.polylines.isNotEmpty()) {
+//            val polySource = rememberGeoJsonSource(
+//
+//            )
+//            LineLayer(
+//                id = "maps-routeline",
+//                source = polySource,
+//                color = colorTypeExpression,
+//            )
+//        }
     }
 }

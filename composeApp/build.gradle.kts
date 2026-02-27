@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
@@ -39,9 +40,6 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.play.services.location)
-            implementation(libs.play.services.maps)
-            implementation(libs.maps.compose)
-            implementation(libs.maps.compose.utils)
         }
         commonMain.dependencies {
             implementation(libs.compose.components.resources)
@@ -62,6 +60,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.contentnegotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.maplibre.compose)
             implementation(libs.moko.geo)
             implementation(libs.moko.geo.compose)
             implementation(projects.shared)

@@ -24,12 +24,11 @@ kotlinxSerialization = "1.10.0"
 ksp = "2.3.4"
 ktor = "3.4.0"
 logback = "1.5.32"
-mapsCompose = "6.12.2"
+maplibre = "0.12.1"
 material = "1.7.3"
 material3 = "1.11.0-alpha02"
 okio = "3.16.4"
 playServicesLocation = "21.3.0"
-playServicesMaps = "19.2.0"
 sqlite = "2.6.2"
 room = "2.8.4"
 secretsGradlePlugin = "2.0.1"
@@ -73,11 +72,9 @@ ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "kto
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-server-tests = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
-maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "mapsCompose" }
+maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 room-common = { group = "androidx.room", name = "room-common", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
