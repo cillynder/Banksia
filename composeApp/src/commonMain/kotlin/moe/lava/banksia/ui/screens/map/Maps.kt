@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
@@ -158,6 +159,12 @@ fun Maps(
                 radius = const(3.dp),
                 strokeWidth = const(2.dp),
                 strokeColor = colorTypeExpression,
+            )
+            CircleLayer(
+                id = "maps-stops0-clickhandler",
+                source = stopsSource,
+                color = const(Color.Transparent),
+                radius = const(12.dp),
                 onClick = { features ->
                     val feature = features[0]
                     val marker = Json.decodeFromJsonElement<MarkerProps>(feature.properties!!)
