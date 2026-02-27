@@ -1,4 +1,4 @@
-package moe.lava.banksia.ui.screens
+package moe.lava.banksia.ui.screens.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,13 +20,13 @@ import moe.lava.banksia.data.ptv.structures.PtvRoute
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.RouteType
 import moe.lava.banksia.ui.components.getUIProperties
-import moe.lava.banksia.ui.platform.maps.CameraPosition
-import moe.lava.banksia.ui.platform.maps.CameraPositionBounds
-import moe.lava.banksia.ui.platform.maps.Marker
-import moe.lava.banksia.ui.platform.maps.Polyline
 import moe.lava.banksia.ui.state.InfoPanelState
 import moe.lava.banksia.ui.state.MapState
 import moe.lava.banksia.ui.state.SearchState
+import moe.lava.banksia.ui.utils.map.CameraPosition
+import moe.lava.banksia.ui.utils.map.CameraPositionBounds
+import moe.lava.banksia.ui.utils.map.Marker
+import moe.lava.banksia.ui.utils.map.Polyline
 import moe.lava.banksia.util.BoxedValue
 import moe.lava.banksia.util.BoxedValue.Companion.box
 import moe.lava.banksia.util.LoopFlow.Companion.waitUntilSubscribed

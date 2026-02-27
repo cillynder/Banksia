@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import moe.lava.banksia.client.di.ClientModule
 import moe.lava.banksia.di.CommonModules
-import moe.lava.banksia.ui.screens.MapScreen
+import moe.lava.banksia.ui.screens.map.MapScreen
 import org.koin.compose.KoinMultiplatformApplication
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.dsl.koinConfiguration

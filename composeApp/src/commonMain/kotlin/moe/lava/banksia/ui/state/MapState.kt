@@ -1,7 +1,7 @@
 package moe.lava.banksia.ui.state
 
-import moe.lava.banksia.ui.platform.maps.Marker
-import moe.lava.banksia.ui.platform.maps.Polyline
+import moe.lava.banksia.ui.utils.map.Marker
+import moe.lava.banksia.ui.utils.map.Polyline
 
 data class MapState(
     val stops: List<Marker.Stop> = listOf(),

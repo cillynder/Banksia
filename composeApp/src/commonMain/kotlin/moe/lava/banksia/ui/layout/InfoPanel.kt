@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import moe.lava.banksia.ui.components.RouteIcon
-import moe.lava.banksia.ui.screens.MapScreenEvent
+import moe.lava.banksia.ui.screens.map.MapScreenEvent
 import moe.lava.banksia.ui.state.InfoPanelState
 
 @Composable

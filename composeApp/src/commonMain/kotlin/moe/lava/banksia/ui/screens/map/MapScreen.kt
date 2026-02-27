@@ -1,4 +1,4 @@
-package moe.lava.banksia.ui.screens
+package moe.lava.banksia.ui.screens.map
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -36,7 +36,6 @@ import moe.lava.banksia.ui.layout.InfoPanel
 import moe.lava.banksia.ui.layout.Searcher
 import moe.lava.banksia.ui.layout.SheetStateWrapper
 import moe.lava.banksia.ui.platform.BanksiaTheme
-import moe.lava.banksia.ui.platform.maps.Maps
 import moe.lava.banksia.ui.state.InfoPanelState
 import moe.lava.banksia.util.Point
 import org.jetbrains.compose.resources.painterResource

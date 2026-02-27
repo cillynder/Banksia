@@ -15,7 +15,7 @@ import moe.lava.banksia.client.datasource.remote.StopRemoteDataSource
 import moe.lava.banksia.client.repository.RouteRepository
 import moe.lava.banksia.client.repository.StopRepository
 import moe.lava.banksia.data.ptv.PtvService
-import moe.lava.banksia.ui.screens.MapScreenViewModel
+import moe.lava.banksia.ui.screens.map.MapScreenViewModel
 import moe.lava.banksia.util.log
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf

@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import moe.lava.banksia.ui.components.RouteIcon
-import moe.lava.banksia.ui.screens.MapScreenEvent
+import moe.lava.banksia.ui.screens.map.MapScreenEvent
 import moe.lava.banksia.ui.state.SearchState
 
 @OptIn(ExperimentalMaterial3Api::class)
