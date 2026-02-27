@@ -1,5 +1,10 @@
 package moe.lava.banksia.ui.layout
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,10 +16,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,10 +37,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import moe.lava.banksia.ui.components.RouteIcon
 import moe.lava.banksia.ui.screens.map.MapScreenEvent
 import moe.lava.banksia.ui.state.InfoPanelState
+import kotlin.time.Duration.Companion.milliseconds
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InfoPanel(
     state: InfoPanelState,
@@ -40,6 +54,16 @@ fun InfoPanel(
         return
 
     val localDensity = LocalDensity.current
+    var delayedLoad by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.loading) {
+        if (state.loading) {
+            delay(200.milliseconds)
+            delayedLoad = true
+        } else {
+            delayedLoad = false
+        }
+    }
 
     Column(
         Modifier
@@ -57,10 +81,17 @@ fun InfoPanel(
                 is InfoPanelState.None -> throw UnsupportedOperationException()
             }
 
-            if (state.loading)
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp).align(Alignment.TopEnd)
+            this@Column.AnimatedVisibility(
+                modifier = Modifier.align(Alignment.TopEnd),
+                visible = delayedLoad,
+                label = "sheet-loading",
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut(),
+            ) {
+                LoadingIndicator(
+                    modifier = Modifier.size(48.dp)
                 )
+            }
         }
         Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.safeContent))
     }
