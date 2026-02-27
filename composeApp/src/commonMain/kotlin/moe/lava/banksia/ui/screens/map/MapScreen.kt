@@ -1,5 +1,8 @@
 package moe.lava.banksia.ui.screens.map
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -93,33 +96,40 @@ fun MapScreen(
                 },
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .windowInsetsPadding(
-                        WindowInsets.safeContent.add(
-                            WindowInsets(bottom = sheetState.bottomInset)
-                        )
-                    ),
-                contentAlignment = Alignment.BottomEnd
+            AnimatedVisibility(
+                visible = !searchExpandedState,
+                label = "search-hider",
+                enter = fadeIn(),
+                exit = fadeOut(),
             ) {
-                FloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    onClick = { viewModel.centreCameraToLocation() },
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(
+                            WindowInsets.safeContent.add(
+                                WindowInsets(bottom = sheetState.bottomInset)
+                            )
+                        ),
+                    contentAlignment = Alignment.BottomEnd
                 ) {
-                    Icon(painterResource(Res.drawable.my_location_24), "Move to current location")
+                    FloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        onClick = { viewModel.centreCameraToLocation() },
+                    ) {
+                        Icon(painterResource(Res.drawable.my_location_24), "Move to current location")
+                    }
                 }
-            }
 
-            AppBottomSheet(
-                sheetState = sheetState,
-                onDismiss = { viewModel.handleEvent(MapScreenEvent.DismissState) }
-            ) {
-                InfoPanel(
-                    state = infoState,
-                    onEvent = viewModel::handleEvent,
-                    onPeekHeightChange = { ph -> sheetState.peekTo(ph) },
-                )
+                AppBottomSheet(
+                    sheetState = sheetState,
+                    onDismiss = { viewModel.handleEvent(MapScreenEvent.DismissState) }
+                ) {
+                    InfoPanel(
+                        state = infoState,
+                        onEvent = viewModel::handleEvent,
+                        onPeekHeightChange = { ph -> sheetState.peekTo(ph) },
+                    )
+                }
             }
         }
     }
