@@ -2,8 +2,8 @@ package moe.lava.banksia.client.repository
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import moe.lava.banksia.client.datasource.local.RouteLocalDataSource
-import moe.lava.banksia.client.datasource.remote.RouteRemoteDataSource
+import moe.lava.banksia.client.data.route.RouteLocalDataSource
+import moe.lava.banksia.client.data.route.RouteRemoteDataSource
 
 class RouteRepository(
     private val local: RouteLocalDataSource,

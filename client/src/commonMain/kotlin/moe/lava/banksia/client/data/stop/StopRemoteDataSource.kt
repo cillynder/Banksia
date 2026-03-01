@@ -1,4 +1,4 @@
-package moe.lava.banksia.client.datasource.remote
+package moe.lava.banksia.client.data.stop
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

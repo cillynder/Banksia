@@ -1,4 +1,4 @@
-package moe.lava.banksia.client.datasource.local
+package moe.lava.banksia.client.data.stop
 
 import moe.lava.banksia.model.Stop
 import moe.lava.banksia.room.dao.RouteDao

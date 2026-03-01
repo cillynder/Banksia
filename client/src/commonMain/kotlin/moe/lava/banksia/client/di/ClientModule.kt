@@ -8,17 +8,15 @@ import io.ktor.client.plugins.plugin
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import moe.lava.banksia.Constants
-import moe.lava.banksia.client.datasource.local.RouteLocalDataSource
-import moe.lava.banksia.client.datasource.local.StopLocalDataSource
-import moe.lava.banksia.client.datasource.remote.RouteRemoteDataSource
-import moe.lava.banksia.client.datasource.remote.StopRemoteDataSource
+import moe.lava.banksia.client.data.route.RouteLocalDataSource
+import moe.lava.banksia.client.data.route.RouteRemoteDataSource
+import moe.lava.banksia.client.data.stop.StopLocalDataSource
+import moe.lava.banksia.client.data.stop.StopRemoteDataSource
 import moe.lava.banksia.client.repository.RouteRepository
 import moe.lava.banksia.client.repository.StopRepository
 import moe.lava.banksia.data.ptv.PtvService
-import moe.lava.banksia.ui.screens.map.MapScreenViewModel
 import moe.lava.banksia.util.log
 import org.koin.core.module.dsl.singleOf
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val ClientModule = module {
@@ -52,7 +50,4 @@ val ClientModule = module {
     // Repositories
     singleOf(::RouteRepository)
     singleOf(::StopRepository)
-
-    // ViewModel
-    viewModelOf(::MapScreenViewModel)
 }

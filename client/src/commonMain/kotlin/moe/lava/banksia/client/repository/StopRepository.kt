@@ -2,8 +2,8 @@ package moe.lava.banksia.client.repository
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import moe.lava.banksia.client.datasource.local.StopLocalDataSource
-import moe.lava.banksia.client.datasource.remote.StopRemoteDataSource
+import moe.lava.banksia.client.data.stop.StopLocalDataSource
+import moe.lava.banksia.client.data.stop.StopRemoteDataSource
 
 class StopRepository(
     private val local: StopLocalDataSource,

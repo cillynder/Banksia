@@ -34,7 +34,6 @@ kotlin {
     }
     
     sourceSets {
-        
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
@@ -63,8 +62,10 @@ kotlin {
             implementation(libs.maplibre.compose)
             implementation(libs.moko.geo)
             implementation(libs.moko.geo.compose)
-            implementation(projects.shared)
             implementation(libs.ui.backhandler)
+
+            implementation(projects.client)
+            implementation(projects.shared)
         }
     }
 }
