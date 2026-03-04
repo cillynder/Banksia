@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.net.URI
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -8,6 +9,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.secretsGradle)
+    alias(libs.plugins.spm)
 }
 
 kotlin {
@@ -27,10 +29,17 @@ kotlin {
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
+        iosTarget.compilations {
+            getByName("main") {
+                cinterops.create("spmMaplibre")
+            }
+        }
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
+//        iosTarget.swiftPackageConfig(cinteropName = "banksia") {
+//        }
     }
     
     sourceSets {
@@ -108,4 +117,16 @@ secrets {
 compose.resources {
     publicResClass = true
     packageOfResClass = "moe.lava.banksia.resources"
+}
+
+swiftPackageConfig {
+    create("spmMaplibre") {
+        dependency {
+            remotePackageVersion(
+                url = URI("https://github.com/maplibre/maplibre-gl-native-distribution.git"),
+                products = { add("MapLibre") },
+                version = "6.17.1",
+            )
+        }
+    }
 }

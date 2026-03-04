@@ -1,9 +1,12 @@
 package moe.lava.banksia.util
 
+import platform.Foundation.NSLog
+
+// TODO: use better logging functions maybe(?)
 actual fun log(tag: String, msg: String) {
-    TODO("Not yet implemented")
+    NSLog("$tag: $msg")
 }
 
 actual fun error(tag: String, msg: String, throwable: Throwable?) {
-    TODO("Not yet implemented")
+    NSLog("$tag: $msg: ${throwable?.stackTraceToString()}")
 }

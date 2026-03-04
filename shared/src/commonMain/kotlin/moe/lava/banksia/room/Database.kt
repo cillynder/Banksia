@@ -1,7 +1,9 @@
 package moe.lava.banksia.room
 
 import androidx.room.AutoMigration
+import androidx.room.ConstructedBy
 import androidx.room.RoomDatabase
+import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +39,7 @@ import androidx.room.Database as DatabaseAnnotation
     ]
 )
 @TypeConverters(RouteTypeConverter::class)
+@ConstructedBy(DatabaseConstructor::class)
 abstract class Database : RoomDatabase() {
     abstract val versionMetadataDao: VersionMetadataDao
     abstract val routeDao: RouteDao
@@ -53,4 +56,9 @@ abstract class Database : RoomDatabase() {
 //                .fallbackToDestructiveMigration(true)
                 .build()
     }
+}
+
+@Suppress("KotlinNoActualForExpect")
+expect object DatabaseConstructor : RoomDatabaseConstructor<Database> {
+    override fun initialize(): Database
 }
