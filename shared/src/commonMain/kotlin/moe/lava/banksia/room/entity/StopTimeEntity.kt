@@ -3,6 +3,7 @@ package moe.lava.banksia.room.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.Companion.CASCADE
+import androidx.room.Index
 import kotlinx.serialization.ExperimentalSerializationApi
 import moe.lava.banksia.model.FutureTime
 import moe.lava.banksia.model.FutureTime.Companion.asInt
@@ -11,6 +12,10 @@ import moe.lava.banksia.model.StopTime
 @Entity(
     "StopTime",
     primaryKeys = ["tripId", "stopId"],
+    indices = [
+        Index("tripId", unique = true),
+        Index("stopId", unique = true),
+    ],
     foreignKeys = [
         ForeignKey(TripEntity::class, parentColumns = ["id"], childColumns = ["tripId"], onDelete = CASCADE),
         ForeignKey(StopEntity::class, parentColumns = ["id"], childColumns = ["stopId"], onDelete = CASCADE),

@@ -9,7 +9,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import moe.lava.banksia.model.RouteType
 
-private object PtvRouteTypeSerialiser : KSerializer<PtvRouteType> {
+object PtvRouteTypeSerialiser : KSerializer<PtvRouteType> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
         PtvRouteType::class.qualifiedName!!,
         PrimitiveKind.INT)

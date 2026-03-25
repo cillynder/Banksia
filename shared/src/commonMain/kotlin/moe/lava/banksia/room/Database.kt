@@ -7,12 +7,12 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import moe.lava.banksia.room.converter.RouteTypeConverter
-import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.room.dao.RouteDao
 import moe.lava.banksia.room.dao.ShapeDao
 import moe.lava.banksia.room.dao.StopDao
 import moe.lava.banksia.room.dao.StopTimeDao
 import moe.lava.banksia.room.dao.TripDao
+import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.room.entity.RouteEntity
 import moe.lava.banksia.room.entity.ShapeEntity
 import moe.lava.banksia.room.entity.StopEntity
@@ -22,7 +22,7 @@ import moe.lava.banksia.room.entity.VersionMetadataEntity
 import androidx.room.Database as DatabaseAnnotation
 
 @DatabaseAnnotation(
-    version = 3,
+    version = 5,
     entities = [
         RouteEntity::class,
         ShapeEntity::class,

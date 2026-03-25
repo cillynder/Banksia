@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.Companion.CASCADE
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import moe.lava.banksia.model.Trip
 
@@ -13,6 +14,7 @@ import moe.lava.banksia.model.Trip
         ForeignKey(RouteEntity::class, parentColumns = ["id"], childColumns = ["routeId"], onDelete = CASCADE),
         ForeignKey(ShapeEntity::class, parentColumns = ["id"], childColumns = ["shapeId"], onDelete = CASCADE),
     ],
+    indices = [Index("shapeId")],
 )
 data class TripEntity(
     @PrimaryKey val id: String,
