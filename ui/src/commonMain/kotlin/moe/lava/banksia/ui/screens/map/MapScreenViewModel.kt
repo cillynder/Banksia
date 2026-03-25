@@ -15,39 +15,35 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import moe.lava.banksia.client.repository.RouteRepository
 import moe.lava.banksia.client.repository.StopRepository
+import moe.lava.banksia.client.repository.StopTimeRepository
 import moe.lava.banksia.data.ptv.PtvService
-import moe.lava.banksia.data.ptv.structures.PtvRoute
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.RouteType
-import moe.lava.banksia.ui.components.getUIProperties
+import moe.lava.banksia.ui.map.util.CameraPosition
+import moe.lava.banksia.ui.map.util.CameraPositionBounds
+import moe.lava.banksia.ui.map.util.Marker
 import moe.lava.banksia.ui.state.InfoPanelState
 import moe.lava.banksia.ui.state.MapState
 import moe.lava.banksia.ui.state.SearchState
-import moe.lava.banksia.ui.utils.map.CameraPosition
-import moe.lava.banksia.ui.utils.map.CameraPositionBounds
-import moe.lava.banksia.ui.utils.map.Marker
-import moe.lava.banksia.ui.utils.map.Polyline
 import moe.lava.banksia.util.BoxedValue
 import moe.lava.banksia.util.BoxedValue.Companion.box
 import moe.lava.banksia.util.LoopFlow.Companion.waitUntilSubscribed
 import moe.lava.banksia.util.Point
 import moe.lava.banksia.util.log
-import kotlin.time.Clock
-import kotlin.time.Instant
 
 sealed class MapScreenEvent {
     data object DismissState : MapScreenEvent()
 
     data class SelectRoute(val id: String?) : MapScreenEvent()
     data class SelectRun(val ref: String?) : MapScreenEvent()
-    data class SelectStop(val typeIdPair: Pair<RouteType, String>?) : MapScreenEvent()
+    data class SelectStop(val id: String?) : MapScreenEvent()
 
     data class SearchUpdate(val text: String) : MapScreenEvent()
 }
 
 data class InternalState(
     val route: String? = null,
-    val stop: Pair<RouteType, String>? = null,
+    val stop: String? = null,
     val run: String? = null,
 )
 
@@ -55,6 +51,7 @@ class MapScreenViewModel(
     private val ptvService: PtvService,
     private val routeRepository: RouteRepository,
     private val stopRepository: StopRepository,
+    private val stopTimeRepository: StopTimeRepository,
 ) : ViewModel() {
     private var state = InternalState()
         set(value) {
@@ -92,7 +89,7 @@ class MapScreenViewModel(
                 is MapScreenEvent.DismissState -> dismissState()
                 is MapScreenEvent.SelectRoute -> state = InternalState(route = event.id)
                 is MapScreenEvent.SelectRun -> state = state.copy(run = event.ref, stop = null)
-                is MapScreenEvent.SelectStop -> state = state.copy(stop = event.typeIdPair, run = null)
+                is MapScreenEvent.SelectStop -> state = state.copy(stop = event.id, run = null)
                 is MapScreenEvent.SearchUpdate -> searchUpdate(event.text)
             }
         }
@@ -206,12 +203,11 @@ class MapScreenViewModel(
     }
 
     // [TODO]: Cleanup
-    private suspend fun switchStop(pair: Pair<RouteType, String>?) {
-        if (pair == null) {
+    private suspend fun switchStop(id: String?) {
+        if (id == null) {
             iInfoState.update { InfoPanelState.None }
             return
         }
-        val (type, id) = pair
 
         val stop = stopRepository.get(id)
 //        val stop = ptvService.stop(routeType, stopId)
@@ -226,36 +222,30 @@ class MapScreenViewModel(
             )
         }
 
-        val res = ptvService.departures(type, stop.id)
-        // Map<
-        //     Pair<DirectionId, RouteId>,
-        //     Pair<DirectionName, List<DepartureTimes>>
-        // >
-        val timetable = HashMap<Pair<Int, Int>, Pair<String, MutableList<String>>>()
-        res.departures.forEach { dep ->
-            val key = Pair(dep.directionId, dep.routeId)
-            val direction = ptvService.direction(dep.directionId, dep.routeId)
-            val route = res.routes[dep.routeId.toString()]
-            val prefix = route?.let { if (it.routeNumber == "") "" else "${it.routeNumber} - " } ?: ""
-            val element = timetable.getOrPut(key) { Pair(prefix + direction.directionName, mutableListOf()) }.second
-            if (element.size >= 5)
-                return@forEach
-
-            val date = Instant.parse(dep.estimatedDepartureUtc ?: dep.scheduledDepartureUtc)
-            val min = (date - Clock.System.now()).inWholeMinutes
-            if (min <= -5)
-                return@forEach
-            if (min >= 65)
-                element.add("${((min + 30.0) / 60.0).toInt()}hr")
-            else
-                element.add("${min}mn")
-        }
-        val departures = timetable.values.sortedBy { it.first }.map { (name, list) ->
-            if (list.isEmpty())
-                InfoPanelState.Stop.Departure(name, "No departures")
-            else
-                InfoPanelState.Stop.Departure(name, list.joinToString(" | "))
-        }
+        val departures = stopTimeRepository.getForStop(id)
+            .filter { it.headsign != null }
+            .groupBy { it.headsign!! }
+            .map { (headsign, stopTimes) ->
+                InfoPanelState.Stop.Departure(headsign, "...")
+                // TODO
+//                val tmsF = stopTimes.map { time ->
+//                    val key = Pair(dep.directionId, dep.routeId)
+//                    val direction = ptvService.direction(dep.directionId, dep.routeId)
+//                    val route = res.routes[dep.routeId.toString()]
+//                    val prefix = route?.let { if (it.routeNumber == "") "" else "${it.routeNumber} - " } ?: ""
+//                    val element = timetable.getOrPut(key) { Pair(prefix + direction.directionName, mutableListOf()) }.second
+//                    if (element.size >= 5)
+//                        return@forEach
+//
+//                    val min = (time.departureTime.time - Clock.System.now()).inWholeMinutes
+//                    if (min <= -5)
+//                        return@forEach
+//                    if (min >= 65)
+//                        element.add("${((min + 30.0) / 60.0).toInt()}hr")
+//                    else
+//                        element.add("${min}mn")
+//                }
+            }
         iInfoState.update {
             if (it !is InfoPanelState.Stop)
                 it
@@ -264,7 +254,7 @@ class MapScreenViewModel(
         }
     }
 
-    private suspend fun buildPolylines(route: PtvRoute) {
+    /*private suspend fun buildPolylines(route: PtvRoute) {
         val routeWithGeo = if (route.geopath.isEmpty())
             ptvService.route(route.routeId, true)
         else
@@ -294,9 +284,9 @@ class MapScreenViewModel(
 
         iMapState.update { it.copy(polylines = polylines) }
         newCameraPosition?.let { iCameraChangeEmitter.emit(it.box()) }
-    }
+    }*/
 
-    private fun buildRuns(route: PtvRoute) {
+    /*private fun buildRuns(route: PtvRoute) {
         ptvService
             .runsFlow(route.routeId)
             .waitUntilSubscribed(iInfoState)
@@ -317,19 +307,16 @@ class MapScreenViewModel(
                 iMapState.update { it.copy(vehicles = markers) }
             }
             .launchIn(viewModelScope)
-
-    }
+    }*/
 
     private suspend fun buildStops(route: Route) {
         val stops = stopRepository.getByRoute(route.id)
-        val colour = route.type.getUIProperties().colour
 
         val markers = stops
             .map { stop ->
                 Marker.Stop(
                     point = stop.pos,
                     id = stop.id,
-                    colour = colour,
                     type = route.type,
                 )
             }

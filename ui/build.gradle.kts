@@ -25,6 +25,7 @@ kotlin {
 
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
 
     listOf(
@@ -68,6 +69,8 @@ kotlin {
 
             implementation(projects.client)
             implementation(projects.shared)
+            implementation(projects.ui.maps)
+            implementation(projects.ui.shared)
         }
     }
 }
@@ -78,9 +81,4 @@ dependencies {
 
 secrets {
     propertiesFileName = "secrets.properties"
-}
-
-compose.resources {
-    publicResClass = true
-    packageOfResClass = "moe.lava.banksia.resources"
 }

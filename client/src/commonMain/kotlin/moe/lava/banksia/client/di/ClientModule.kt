@@ -12,8 +12,10 @@ import moe.lava.banksia.client.data.route.RouteLocalDataSource
 import moe.lava.banksia.client.data.route.RouteRemoteDataSource
 import moe.lava.banksia.client.data.stop.StopLocalDataSource
 import moe.lava.banksia.client.data.stop.StopRemoteDataSource
+import moe.lava.banksia.client.data.stoptime.StopTimePtvDataSource
 import moe.lava.banksia.client.repository.RouteRepository
 import moe.lava.banksia.client.repository.StopRepository
+import moe.lava.banksia.client.repository.StopTimeRepository
 import moe.lava.banksia.data.ptv.PtvService
 import moe.lava.banksia.util.log
 import org.koin.core.module.dsl.singleOf
@@ -46,8 +48,10 @@ val ClientModule = module {
     singleOf(::RouteRemoteDataSource)
     singleOf(::StopLocalDataSource)
     singleOf(::StopRemoteDataSource)
+    singleOf(::StopTimePtvDataSource)
 
     // Repositories
     singleOf(::RouteRepository)
     singleOf(::StopRepository)
+    singleOf(::StopTimeRepository)
 }

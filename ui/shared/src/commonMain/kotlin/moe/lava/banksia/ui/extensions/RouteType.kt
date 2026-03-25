@@ -1,27 +1,8 @@
-package moe.lava.banksia.ui.components
+package moe.lava.banksia.ui.extensions
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import moe.lava.banksia.data.ptv.structures.PtvRouteType
 import moe.lava.banksia.model.RouteType
-import moe.lava.banksia.model.RouteType.Interstate
-import moe.lava.banksia.model.RouteType.MetroBus
-import moe.lava.banksia.model.RouteType.MetroTrain
-import moe.lava.banksia.model.RouteType.MetroTram
-import moe.lava.banksia.model.RouteType.RegionalBus
-import moe.lava.banksia.model.RouteType.RegionalCoach
-import moe.lava.banksia.model.RouteType.RegionalTrain
-import moe.lava.banksia.model.RouteType.SkyBus
 import moe.lava.banksia.resources.Res
 import moe.lava.banksia.resources.bus
 import moe.lava.banksia.resources.bus_background
@@ -33,7 +14,6 @@ import moe.lava.banksia.resources.tram
 import moe.lava.banksia.resources.tram_background
 import moe.lava.banksia.resources.tram_icon
 import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 
 data class RouteTypeProperties(
     val colour: Color,
@@ -49,31 +29,31 @@ const val VLINE_PURPLE = 0xFF8F1A95
 
 fun RouteType.getUIProperties(): RouteTypeProperties {
     val colour = when (this) {
-        MetroTrain -> TRAIN_BLUE
-        MetroTram -> TRAM_GREEN
-        MetroBus -> BUS_ORANGE
-        RegionalTrain -> VLINE_PURPLE
-        RegionalCoach -> VLINE_PURPLE
-        RegionalBus -> VLINE_PURPLE
-        SkyBus -> BUS_ORANGE
-        Interstate -> BUS_ORANGE
+        RouteType.MetroTrain -> TRAIN_BLUE
+        RouteType.MetroTram -> TRAM_GREEN
+        RouteType.MetroBus -> BUS_ORANGE
+        RouteType.RegionalTrain -> VLINE_PURPLE
+        RouteType.RegionalCoach -> VLINE_PURPLE
+        RouteType.RegionalBus -> VLINE_PURPLE
+        RouteType.SkyBus -> BUS_ORANGE
+        RouteType.Interstate -> BUS_ORANGE
     }
 
     val (drawable, background, icon) = when (this) {
-        MetroTrain,
-        RegionalTrain,
-        Interstate -> Triple(
+        RouteType.MetroTrain,
+        RouteType.RegionalTrain,
+        RouteType.Interstate -> Triple(
             Res.drawable.train, Res.drawable.train_background, Res.drawable.train_icon
         )
 
-        MetroTram -> Triple(
+        RouteType.MetroTram -> Triple(
             Res.drawable.tram, Res.drawable.tram_background, Res.drawable.tram_icon
         )
 
-        MetroBus,
-        RegionalCoach,
-        RegionalBus,
-        SkyBus -> Triple(
+        RouteType.MetroBus,
+        RouteType.RegionalCoach,
+        RouteType.RegionalBus,
+        RouteType.SkyBus -> Triple(
             Res.drawable.bus, Res.drawable.bus_background, Res.drawable.bus_icon
         )
     }
@@ -100,37 +80,5 @@ fun PtvRouteType.getUIProperties(): RouteTypeProperties {
         )
     }
     return RouteTypeProperties(colour, drawable, background, icon)
-}
-
-@Composable
-fun RouteIcon(
-    modifier: Modifier = Modifier.Companion,
-    size: Dp = 40.dp,
-    routeType: RouteType,
-) {
-    val properties = routeType.getUIProperties()
-    Image(
-        painter = painterResource(properties.icon),
-        contentDescription = null,
-        modifier = modifier
-            .size(size)
-            .aspectRatio(1f)
-            .padding(size * ICON_PADDING / 2)
-            .drawBehind {
-                drawCircle(properties.colour, radius = size.toPx() / 2f)
-            }
-    )
-}
-
-const val ICON_PADDING = 0.25f
-
-@Preview
-@Composable
-private fun RouteIconPreview() {
-    Row {
-        RouteIcon(routeType = MetroTrain)
-        RouteIcon(routeType = MetroTram)
-        RouteIcon(routeType = MetroBus)
-    }
 }
 

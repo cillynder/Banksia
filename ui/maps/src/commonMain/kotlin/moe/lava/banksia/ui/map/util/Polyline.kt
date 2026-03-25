@@ -1,4 +1,4 @@
-package moe.lava.banksia.ui.utils.map
+package moe.lava.banksia.ui.map.util
 
 import androidx.compose.ui.graphics.Color
 import moe.lava.banksia.util.Point

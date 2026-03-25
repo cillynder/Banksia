@@ -4,11 +4,13 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidMultiplatformLibrary)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
     android {
-        namespace = "moe.lava.banksia.client"
+        namespace = "moe.lava.banksia.ui.map"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
 
         compilerOptions {
@@ -18,6 +20,7 @@ kotlin {
 
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
 
     iosArm64()
@@ -34,10 +37,20 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.datetime)
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.contentnegotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+
+            implementation(libs.maplibre.compose)
+            implementation(libs.moko.geo)
+            implementation(libs.moko.geo.compose)
+
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.ui)
+
             implementation(projects.shared)
+            implementation(projects.ui.shared)
         }
     }
 }

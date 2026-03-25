@@ -13,6 +13,10 @@ kotlin {
         }
     }
 
+    compilerOptions {
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
+    }
+
     dependencies {
         implementation(projects.ui)
         implementation(libs.androidx.activity.compose)

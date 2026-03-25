@@ -38,13 +38,11 @@ import moe.lava.banksia.ui.layout.AppBottomSheet
 import moe.lava.banksia.ui.layout.InfoPanel
 import moe.lava.banksia.ui.layout.Searcher
 import moe.lava.banksia.ui.layout.SheetStateWrapper
+import moe.lava.banksia.ui.map.Maps
 import moe.lava.banksia.ui.platform.BanksiaTheme
 import moe.lava.banksia.ui.state.InfoPanelState
-import moe.lava.banksia.util.Point
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
-
-val MELBOURNE = Point(-37.8136, 144.9631)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -78,14 +76,20 @@ fun MapScreen(
         Scaffold {
             Maps(
                 modifier = Modifier.fillMaxSize(),
-                state = mapState,
-                onEvent = viewModel::handleEvent,
-                cameraPositionFlow = viewModel.cameraChangeEmitter,
-                extInsets = WindowInsets(top = with(LocalDensity.current) {
+                insets = WindowInsets(top = with(LocalDensity.current) {
                     SearchBarDefaults.InputFieldHeight.roundToPx()
                 }, bottom = sheetState.bottomInset),
-                setLastKnownLocation = viewModel::setLastKnownLocation,
+                stops = mapState.stops,
+//                vehicles = mapState.vehicles,
+                onStopClicked = { stop ->
+                    viewModel.handleEvent(MapScreenEvent.SelectStop(stop))
+                },
+//                onEvent = viewModel::handleEvent,
+//                cameraPositionFlow = viewModel.cameraChangeEmitter,
+//                setLastKnownLocation = viewModel::setLastKnownLocation,
             )
+
+//    onEvent()
             Searcher(
                 state = searchState,
                 onEvent = viewModel::handleEvent,
