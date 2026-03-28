@@ -22,7 +22,7 @@ import moe.lava.banksia.room.entity.VersionMetadataEntity
 import androidx.room.Database as DatabaseAnnotation
 
 @DatabaseAnnotation(
-    version = 5,
+    version = 6,
     entities = [
         RouteEntity::class,
         ShapeEntity::class,

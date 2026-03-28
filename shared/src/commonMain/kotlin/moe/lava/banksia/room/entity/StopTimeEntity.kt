@@ -13,8 +13,8 @@ import moe.lava.banksia.model.StopTime
     "StopTime",
     primaryKeys = ["tripId", "stopId"],
     indices = [
-        Index("tripId", unique = true),
-        Index("stopId", unique = true),
+        Index("tripId", unique = false),
+        Index("stopId", unique = false),
     ],
     foreignKeys = [
         ForeignKey(TripEntity::class, parentColumns = ["id"], childColumns = ["tripId"], onDelete = CASCADE),

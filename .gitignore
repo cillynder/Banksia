@@ -20,3 +20,4 @@ captures
 secrets.properties
 shared/src/commonMain/kotlin/moe/lava/banksia/Constants.kt
 /data/
+/data
