@@ -8,4 +8,5 @@ object Constants {
     // TODO
     const val devMode: Boolean = false
     const val updateKey: String = ""
+    const val protomapsKey: String = ""
 }

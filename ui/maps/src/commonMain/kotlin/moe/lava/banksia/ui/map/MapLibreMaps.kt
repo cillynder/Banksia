@@ -1,5 +1,6 @@
 package moe.lava.banksia.ui.map
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
@@ -9,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
+import moe.lava.banksia.Constants
 import moe.lava.banksia.ui.map.mappers.routeColorExpression
 import moe.lava.banksia.ui.platform.BanksiaTheme
 import org.maplibre.compose.camera.CameraPosition
@@ -42,9 +44,11 @@ internal fun MapLibreMaps(
         )
     )
 
+    val variant = if (isSystemInDarkTheme()) "dark" else "light"
+
     MaplibreMap(
         modifier = modifier,
-        baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/positron"),
+        baseStyle = BaseStyle.Uri("https://api.protomaps.com/styles/v5/$variant/en.json?key=${Constants.protomapsKey}"),
         cameraState = camPos,
         options = MapOptions(
             ornamentOptions = OrnamentOptions(
