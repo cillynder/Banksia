@@ -3,6 +3,7 @@ package moe.lava.banksia.room.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
 import moe.lava.banksia.room.entity.ShapeEntity
 
@@ -13,6 +14,9 @@ interface ShapeDao {
 
     @Insert
     suspend fun insertAll(vararg shapes: ShapeEntity)
+
+    @Insert(onConflict = REPLACE)
+    suspend fun insertOrReplaceAll(vararg shapes: ShapeEntity)
 
     @Delete
     suspend fun delete(shape: ShapeEntity)

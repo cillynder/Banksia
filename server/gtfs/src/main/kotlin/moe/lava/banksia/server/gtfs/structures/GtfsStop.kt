@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Suppress("PropertyName")
 @Serializable
-data class GtfsStop(
+internal data class GtfsStop(
     val stop_id: String,
     val stop_name: String,
     val stop_lat: Double,

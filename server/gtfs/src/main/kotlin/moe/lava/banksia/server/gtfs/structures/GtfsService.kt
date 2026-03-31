@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Suppress("PropertyName")
 @Serializable
-data class GtfsService(
+internal data class GtfsService(
     val service_id: String,
     val monday: Int,
     val tuesday: Int,

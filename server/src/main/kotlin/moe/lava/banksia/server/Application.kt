@@ -26,7 +26,6 @@ import moe.lava.banksia.room.dao.StopDao
 import moe.lava.banksia.room.dao.StopTimeDao
 import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.server.di.ServerModules
-import moe.lava.banksia.server.gtfs.GtfsHandler
 import moe.lava.banksia.server.gtfsr.GtfsrService
 import moe.lava.banksia.util.serialise
 import org.koin.dsl.module
@@ -67,8 +66,8 @@ fun Application.module() {
                 ?: "https://opendata.transport.vic.gov.au/dataset/3f4e292e-7f8a-4ffe-831f-1953be0fe448/resource/${datasetUuid}/download/gtfs.zip"
             call.respondText("received")
             launch(context = Dispatchers.IO) {
-                val handler by inject<GtfsHandler>()
-                handler.update(datasetUrl)
+                val importer by inject<GtfsImporter>()
+                importer.import(datasetUrl)
             }
         }
 

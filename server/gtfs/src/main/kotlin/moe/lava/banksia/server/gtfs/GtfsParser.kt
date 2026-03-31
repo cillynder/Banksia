@@ -9,6 +9,9 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.util.cio.writeChannel
 import io.ktor.util.logging.Logger
 import io.ktor.utils.io.copyAndClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.decodeFromString
@@ -16,14 +19,12 @@ import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.serializer
 import moe.lava.banksia.Constants
 import moe.lava.banksia.model.Route
+import moe.lava.banksia.model.RouteType
 import moe.lava.banksia.model.Service
 import moe.lava.banksia.model.Shape
 import moe.lava.banksia.model.Stop
 import moe.lava.banksia.model.StopTime
 import moe.lava.banksia.model.Trip
-import moe.lava.banksia.room.Database
-import moe.lava.banksia.room.converter.RouteTypeConverter
-import moe.lava.banksia.room.entity.asEntity
 import moe.lava.banksia.server.gtfs.structures.GtfsRoute
 import moe.lava.banksia.server.gtfs.structures.GtfsService
 import moe.lava.banksia.server.gtfs.structures.GtfsShape
@@ -33,19 +34,26 @@ import moe.lava.banksia.server.gtfs.structures.GtfsTrip
 import moe.lava.banksia.util.Point
 import java.io.File
 import java.util.zip.ZipFile
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class GtfsHandler(
+sealed class GtfsData {
+    data class RouteChunk(val routes: List<Route>) : GtfsData()
+    data class ServiceChunk(val services: List<Service>) : GtfsData()
+    data class ShapeChunk(val shapes: List<Shape>) : GtfsData()
+    data class StopChunk(val stops: List<Stop>) : GtfsData()
+    data class StopTimeChunk(val stopTimes: List<StopTime>) : GtfsData()
+    data class TripChunk(val trips: List<Trip>) : GtfsData()
+}
+
+class GtfsParser(
     private val log: Logger,
     private val client: HttpClient,
-    private val db: Database,
 ) {
     private val csv = CsvFormat(StringDeferringConfig(EmptySerializersModule()))
     private val datasetPath = File("/tmp/banksia", "dataset.zip")
 
     @OptIn(ExperimentalTime::class)
-    suspend fun update(datasetUrl: String, date: Long? = null) {
+    suspend fun update(datasetUrl: String): Flow<GtfsData> {
         val parentDir = datasetPath.parentFile
         @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
         if (parentDir.exists() && !Constants.devMode)
@@ -74,39 +82,56 @@ class GtfsHandler(
             extractAll(datasetPath)
         }
 
-        addRoutes(files)
-        addStops(files)
-        addShapes(files)
-        val services = addServices(files)
-        val trips = addTrips(files, services.associateBy { it.id })
-        addStopTimes(files, trips.associateBy { it.id })
+        log.info("parsing...")
+        return parse(files)
+            .onCompletion {
+                @Suppress("KotlinConstantConditions")
+                if (!Constants.devMode) {
+                    parentDir.deleteRecursively()
+                }
 
-        updateMetadata(date ?: Clock.System.now().epochSeconds)
-
-        @Suppress("KotlinConstantConditions")
-        if (!Constants.devMode) {
-            parentDir.deleteRecursively()
-        }
-
-        log.info("done!")
+                log.info("done!")
+            }
     }
 
-    private suspend fun updateMetadata(date: Long) {
-        val dao = db.versionMetadataDao
-        log.info("updating metadata...")
-        dao.update(date, listOf("routes", "stops", "shapes", "trips", "stop_times"))
-    }
-
-    private suspend fun addRoutes(files: List<File>) {
-        val dao = db.routeDao
-        log.info("parsing routes...")
-        val routes = files
+    private fun parse(files: List<File>) = flow {
+        files
             .filter { it.name == "routes.txt" }
-            .flatMap { fd -> parseRoutes(fd) }
+            .forEach { emit(GtfsData.RouteChunk(parseRoutes(it))) }
 
-        log.info("inserting routes...")
-        dao.deleteAll()
-        dao.insertAll(*routes.map { it.asEntity() }.toTypedArray())
+        files
+            .filter { it.name == "stops.txt" }
+            .forEach { emit(GtfsData.StopChunk(parseStops(it))) }
+
+        files
+            .filter { it.name == "shapes.txt" }
+            .forEach { emit(GtfsData.ShapeChunk(parseShapes(it))) }
+
+        val services = files
+            .filter { it.name == "calendar.txt" }
+            .flatMap { fd ->
+                parseServices(fd)
+                    .also { emit(GtfsData.ServiceChunk(it)) }
+            }
+            .associateBy { it.id }
+
+        val trips = files
+            .filter { it.name == "trips.txt" }
+            .flatMap { fd ->
+                parseTrips(fd, services)
+                    .also { emit(GtfsData.TripChunk(it)) }
+            }
+            .associateBy { it.id }
+
+        files
+            .filter { it.name == "stop_times.txt" }
+            .forEach { fd ->
+                log.info("parsing stop times for ${fd.parent}...")
+                parseStopTimes(fd, trips) { seq ->
+                    seq.chunked(1000000)
+                        .forEach { emit(GtfsData.StopTimeChunk(it)) }
+                }
+            }
     }
 
     private fun parseRoutes(fd: File) =
@@ -114,23 +139,11 @@ class GtfsHandler(
             .map { with(it) {
                 Route(
                     id = route_id,
-                    type = RouteTypeConverter.from(fd.parentFile.name.toInt()),
+                    type = RouteType.from(fd.parentFile.name.toInt()),
                     number = route_short_name,
                     name = route_long_name,
                 )
             } }
-
-    private suspend fun addShapes(files: List<File>) {
-        val dao = db.shapeDao
-        log.info("parsing shapes...")
-        val shapes = files
-            .filter { it.name == "shapes.txt" }
-            .flatMap { fd -> parseShapes(fd) }
-
-        log.info("inserting shapes...")
-        dao.deleteAll()
-        dao.insertAll(*shapes.map { it.asEntity() }.toTypedArray())
-    }
 
     private fun parseShapes(fd: File) =
         fd.parseCsv<GtfsShape>()
@@ -142,29 +155,6 @@ class GtfsHandler(
 
                 Shape(id, points)
             }
-
-    private suspend fun addStops(files: List<File>) {
-        val dao = db.stopDao
-        log.info("parsing stops...")
-        val stops = files
-            .filter { it.name == "stops.txt" }
-            .flatMap { fd -> parseStops(fd) }
-
-        log.info("inserting stops...")
-        dao.deleteAll()
-        stops
-            .groupBy { it.id }
-            .forEach { (id, gstops) ->
-                if (gstops.size > 1) {
-                    if (gstops.withIndex().any { (i, stop) -> i != 0 && stop != gstops[i - 1] }) {
-                        gstops.forEach {
-                            log.info("duplicate $id: $it")
-                        }
-                    }
-                }
-            }
-        dao.insertOrReplaceAll(*stops.map { it.asEntity() }.toTypedArray())
-    }
 
     private fun parseStops(fd: File) =
         fd.parseCsv<GtfsStop>()
@@ -179,26 +169,6 @@ class GtfsHandler(
                     platformCode = platform_code,
                 )
             } }
-
-    private suspend fun addStopTimes(files: List<File>, trips: Map<String, Trip>) {
-        val dao = db.stopTimeDao
-        dao.deleteAll()
-        log.info("parsing stop times...")
-        files
-            .filter { it.name == "stop_times.txt" }
-            .forEach { fd ->
-                log.info("parsing stop times for ${fd.parent}...")
-                parseStopTimes(fd, trips) { seq ->
-                    seq.chunked(1000000)
-                        .forEach { queue ->
-                            log.info("converting stop times (${queue.size}) for ${fd.parent}...")
-                            val conv = queue.map { it.asEntity() }.toTypedArray()
-                            log.info("inserting stop times (${conv.size}) for ${fd.parent}...")
-                            dao.insertOrReplaceAll(*conv)
-                        }
-                }
-            }
-    }
 
     private inline fun parseStopTimes(fd: File, trips: Map<String, Trip>, block: (Sequence<StopTime>) -> Unit) =
         fd.parseCsvSequence<GtfsStopTime> { seq ->
@@ -216,20 +186,6 @@ class GtfsHandler(
                 } }
                 .let { block(it) }
         }
-
-    private suspend fun addServices(files: List<File>): List<Service> {
-        val dao = db.serviceDao
-        log.info("parsing services...")
-        val services = files
-            .filter { it.name == "calendar.txt" }
-            .flatMap { fd -> parseServices(fd) }
-
-        log.info("inserting services...")
-        dao.deleteAll()
-        dao.insertOrReplaceAll(*services.map { it.asEntity() }.toTypedArray())
-
-        return services
-    }
 
     private fun parseServices(fd: File) =
         fd.parseCsv<GtfsService>()
@@ -250,20 +206,6 @@ class GtfsHandler(
                     end = LocalDate.parse(end_date, LocalDate.Formats.ISO_BASIC),
                 )
             } }
-
-    private suspend fun addTrips(files: List<File>, services: Map<String, Service>): List<Trip> {
-        val dao = db.tripDao
-        log.info("parsing trips...")
-        val trips = files
-            .filter { it.name == "trips.txt" }
-            .flatMap { fd -> parseTrips(fd, services) }
-
-        log.info("inserting trips...")
-        dao.deleteAll()
-        dao.insertOrReplaceAll(*trips.map { it.asEntity() }.toTypedArray())
-
-        return trips
-    }
 
     private fun parseTrips(fd: File, services: Map<String, Service>) =
         fd.parseCsv<GtfsTrip>()

@@ -49,7 +49,7 @@ sealed class MapScreenEvent {
     data class SearchUpdate(val text: String) : MapScreenEvent()
 }
 
-data class InternalState(
+private data class InternalState(
     val route: String? = null,
     val stop: String? = null,
     val run: String? = null,

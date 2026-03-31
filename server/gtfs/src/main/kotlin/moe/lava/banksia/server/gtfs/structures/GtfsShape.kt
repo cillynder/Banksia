@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Suppress("PropertyName")
 @Serializable
-data class GtfsShape(
+internal data class GtfsShape(
     val shape_id: String,
     val shape_pt_lat: Double,
     val shape_pt_lon: Double,

@@ -13,4 +13,8 @@ enum class RouteType(val value: Int) {
     SkyBus(11),
     Interstate(10),
     ;
+
+    companion object {
+        fun from(value: Int) = RouteType.entries.first { it.value == value }
+    }
 }

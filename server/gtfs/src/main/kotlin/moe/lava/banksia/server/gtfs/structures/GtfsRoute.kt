@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Suppress("PropertyName")
 @Serializable
-data class GtfsRoute(
+internal data class GtfsRoute(
     val route_id: String,
     val agency_id: String,
     val route_short_name: String,

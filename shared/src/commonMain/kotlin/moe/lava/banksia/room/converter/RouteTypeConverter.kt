@@ -5,7 +5,7 @@ import moe.lava.banksia.model.RouteType
 
 object RouteTypeConverter {
     @TypeConverter
-    fun from(value: Int) = RouteType.entries.first { it.value == value }
+    fun from(value: Int) = RouteType.from(value)
 
     @TypeConverter
     fun to(routeType: RouteType) = routeType.value

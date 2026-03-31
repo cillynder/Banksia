@@ -12,8 +12,17 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}")
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
+    }
+}
+
 dependencies {
     implementation(projects.shared)
+    implementation(projects.server.gtfs)
+    implementation(projects.server.gtfsRt)
+
     implementation(libs.logback)
     implementation(libs.koin.core)
     implementation(libs.koin.ktor)

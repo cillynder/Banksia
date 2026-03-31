@@ -5,7 +5,7 @@ import moe.lava.banksia.model.FutureTime
 
 @Suppress("PropertyName")
 @Serializable
-data class GtfsStopTime(
+internal data class GtfsStopTime(
     val trip_id: String,
     val arrival_time: String,
     val departure_time: String,
