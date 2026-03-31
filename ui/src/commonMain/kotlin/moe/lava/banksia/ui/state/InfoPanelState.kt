@@ -16,14 +16,6 @@ sealed class InfoPanelState {
         override val loading = false
     }
 
-    data class Run(
-        val direction: String,
-        val type: RouteType,
-        val routeName: String? = null,
-    ) : InfoPanelState() {
-        override val loading = routeName == null
-    }
-
     data class Stop(
         val id: String,
         val name: String,
@@ -34,5 +26,13 @@ sealed class InfoPanelState {
             get() = departures == null
 
         data class Departure(val directionName: String, val formattedTimes: String)
+    }
+
+    data class Trip(
+        val direction: String,
+        val type: RouteType,
+        val routeName: String? = null,
+    ) : InfoPanelState() {
+        override val loading = routeName == null
     }
 }

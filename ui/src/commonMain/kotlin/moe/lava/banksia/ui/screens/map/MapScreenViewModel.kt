@@ -187,7 +187,7 @@ class MapScreenViewModel(
             .onEach { run ->
                 if (routeName == null) {
                     iInfoState.update {
-                        InfoPanelState.Run(
+                        InfoPanelState.Trip(
                             direction = run.destinationName,
                             type = RouteType.MetroTrain, // XXX HACK TODO FIXME
                         )
@@ -196,7 +196,7 @@ class MapScreenViewModel(
                 }
 
                 iInfoState.update {
-                    InfoPanelState.Run(
+                    InfoPanelState.Trip(
                         direction = run.destinationName,
                         type = RouteType.MetroTrain, // FIXME HACK XXX TODO
                         routeName = routeName,

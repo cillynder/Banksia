@@ -35,9 +35,9 @@ import kotlinx.coroutines.launch
 import moe.lava.banksia.resources.Res
 import moe.lava.banksia.resources.my_location_24
 import moe.lava.banksia.ui.layout.AppBottomSheet
-import moe.lava.banksia.ui.layout.InfoPanel
 import moe.lava.banksia.ui.layout.Searcher
 import moe.lava.banksia.ui.layout.SheetStateWrapper
+import moe.lava.banksia.ui.layout.info.InfoPanel
 import moe.lava.banksia.ui.map.Maps
 import moe.lava.banksia.ui.platform.BanksiaTheme
 import moe.lava.banksia.ui.state.InfoPanelState
