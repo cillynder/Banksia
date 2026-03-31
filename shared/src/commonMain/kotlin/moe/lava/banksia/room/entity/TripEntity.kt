@@ -12,6 +12,7 @@ import moe.lava.banksia.model.Trip
     "Trip",
     foreignKeys = [
         ForeignKey(RouteEntity::class, parentColumns = ["id"], childColumns = ["routeId"], onDelete = CASCADE),
+        ForeignKey(ServiceEntity::class, parentColumns = ["id"], childColumns = ["serviceId"], onDelete = CASCADE),
         ForeignKey(ShapeEntity::class, parentColumns = ["id"], childColumns = ["shapeId"], onDelete = CASCADE),
     ],
     indices = [Index("shapeId")],
@@ -25,8 +26,24 @@ data class TripEntity(
     val directionId: String,
     val blockId: String,
     val wheelchairAccessible: String,
-) {
-    fun asModel() = Trip(id, routeId, serviceId, shapeId, tripHeadsign, directionId, blockId, wheelchairAccessible)
+)
+
+fun Trip.Companion.from(tripEntity: TripEntity, serviceEntity: ServiceEntity): Trip {
+    if (tripEntity.serviceId != serviceEntity.id) {
+        throw IllegalArgumentException("trip and service id mismatch (${tripEntity.serviceId} != ${serviceEntity.id})")
+    }
+    return with(tripEntity) {
+        Trip(
+            id = id,
+            routeId = routeId,
+            service = serviceEntity.asModel(),
+            shapeId = shapeId,
+            tripHeadsign = tripHeadsign,
+            directionId = directionId,
+            blockId = blockId,
+            wheelchairAccessible = wheelchairAccessible
+        )
+    }
 }
 
-fun Trip.asEntity() = TripEntity(id, routeId, serviceId, shapeId, tripHeadsign, directionId, blockId, wheelchairAccessible)
+fun Trip.asEntity() = TripEntity(id, routeId, service.id, shapeId, tripHeadsign, directionId, blockId, wheelchairAccessible)

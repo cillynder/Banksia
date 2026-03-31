@@ -13,10 +13,22 @@ interface StopTimeDao {
     suspend fun getAll(): List<StopTimeEntity>
 
     @Query("SELECT * FROM StopTime WHERE tripId == :tripId")
-    suspend fun get(tripId: String): StopTimeEntity?
+    suspend fun getForTrip(tripId: String): StopTimeEntity?
 
     @Query("SELECT * FROM StopTime WHERE tripId IN (:tripIds)")
-    suspend fun get(tripIds: List<String>): List<StopTimeEntity>
+    suspend fun getForTrips(tripIds: List<String>): List<StopTimeEntity>
+
+    @Query("SELECT * FROM StopTime WHERE stopId == :stopId")
+    suspend fun getForStop(stopId: String): List<StopTimeEntity>
+
+    @Query("""
+        SELECT * FROM StopTime
+        INNER JOIN Service ON Service.days & :days = :days AND :date BETWEEN Service.start AND Service.`end`
+        INNER JOIN Trip ON Trip.serviceId == Service.id
+        WHERE StopTime.tripId == Trip.id
+        AND StopTime.stopId == :stopId
+    """)
+    suspend fun getForStopDated(stopId: String, days: Int, date: Int): List<StopTimeEntity>
 
     @Insert
     suspend fun insertAll(vararg stopTimes: StopTimeEntity)

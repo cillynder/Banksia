@@ -9,6 +9,7 @@ val CommonModules = module {
     single { Database.build(get<PlatformDatabaseBuilder>().getBuilder()) }
     single { get<Database>().versionMetadataDao }
     single { get<Database>().routeDao }
+    single { get<Database>().serviceDao }
     single { get<Database>().shapeDao }
     single { get<Database>().stopDao }
     single { get<Database>().stopTimeDao }

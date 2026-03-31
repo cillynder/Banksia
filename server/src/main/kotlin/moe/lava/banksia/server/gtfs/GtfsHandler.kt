@@ -9,11 +9,14 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.util.cio.writeChannel
 import io.ktor.util.logging.Logger
 import io.ktor.utils.io.copyAndClose
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.serializer
 import moe.lava.banksia.Constants
 import moe.lava.banksia.model.Route
+import moe.lava.banksia.model.Service
 import moe.lava.banksia.model.Shape
 import moe.lava.banksia.model.Stop
 import moe.lava.banksia.model.StopTime
@@ -22,6 +25,7 @@ import moe.lava.banksia.room.Database
 import moe.lava.banksia.room.converter.RouteTypeConverter
 import moe.lava.banksia.room.entity.asEntity
 import moe.lava.banksia.server.gtfs.structures.GtfsRoute
+import moe.lava.banksia.server.gtfs.structures.GtfsService
 import moe.lava.banksia.server.gtfs.structures.GtfsShape
 import moe.lava.banksia.server.gtfs.structures.GtfsStop
 import moe.lava.banksia.server.gtfs.structures.GtfsStopTime
@@ -65,6 +69,7 @@ class GtfsHandler(
                 .listFiles { it.isDirectory }
                 .flatMap { d -> d.listFiles { f -> f.extension == "txt" }.toList() }
                 .ifEmpty { extractAll(datasetPath) }
+                .filter { it.parentFile.name == "2" }
         } else {
             extractAll(datasetPath)
         }
@@ -72,8 +77,9 @@ class GtfsHandler(
         addRoutes(files)
         addStops(files)
         addShapes(files)
-        addTrips(files)
-        addStopTimes(files)
+        val services = addServices(files)
+        val trips = addTrips(files, services.associateBy { it.id })
+        addStopTimes(files, trips.associateBy { it.id })
 
         updateMetadata(date ?: Clock.System.now().epochSeconds)
 
@@ -174,7 +180,7 @@ class GtfsHandler(
                 )
             } }
 
-    private suspend fun addStopTimes(files: List<File>) {
+    private suspend fun addStopTimes(files: List<File>, trips: Map<String, Trip>) {
         val dao = db.stopTimeDao
         dao.deleteAll()
         log.info("parsing stop times...")
@@ -182,7 +188,7 @@ class GtfsHandler(
             .filter { it.name == "stop_times.txt" }
             .forEach { fd ->
                 log.info("parsing stop times for ${fd.parent}...")
-                parseStopTimes(fd) { seq ->
+                parseStopTimes(fd, trips) { seq ->
                     seq.chunked(1000000)
                         .forEach { queue ->
                             log.info("converting stop times (${queue.size}) for ${fd.parent}...")
@@ -194,7 +200,7 @@ class GtfsHandler(
             }
     }
 
-    private inline fun parseStopTimes(fd: File, block: (Sequence<StopTime>) -> Unit) =
+    private inline fun parseStopTimes(fd: File, trips: Map<String, Trip>, block: (Sequence<StopTime>) -> Unit) =
         fd.parseCsvSequence<GtfsStopTime> { seq ->
             seq
                 .map { with(it) {
@@ -203,7 +209,7 @@ class GtfsHandler(
                         stopId = stop_id,
                         arrivalTime = GtfsStopTime.parseGtfsTime(arrival_time),
                         departureTime = GtfsStopTime.parseGtfsTime(departure_time),
-                        headsign = stop_headsign,
+                        headsign = stop_headsign.ifEmpty { trips[trip_id]!!.tripHeadsign },
                         pickupType = pickup_type,
                         dropOffType = drop_off_type,
                     )
@@ -211,25 +217,61 @@ class GtfsHandler(
                 .let { block(it) }
         }
 
-    private suspend fun addTrips(files: List<File>) {
+    private suspend fun addServices(files: List<File>): List<Service> {
+        val dao = db.serviceDao
+        log.info("parsing services...")
+        val services = files
+            .filter { it.name == "calendar.txt" }
+            .flatMap { fd -> parseServices(fd) }
+
+        log.info("inserting services...")
+        dao.deleteAll()
+        dao.insertOrReplaceAll(*services.map { it.asEntity() }.toTypedArray())
+
+        return services
+    }
+
+    private fun parseServices(fd: File) =
+        fd.parseCsv<GtfsService>()
+            .map { with(it) {
+                val days = buildList {
+                    if (monday == 1) add(DayOfWeek.MONDAY)
+                    if (tuesday == 1) add(DayOfWeek.TUESDAY)
+                    if (wednesday == 1) add(DayOfWeek.WEDNESDAY)
+                    if (thursday == 1) add(DayOfWeek.THURSDAY)
+                    if (friday == 1) add(DayOfWeek.FRIDAY)
+                    if (saturday == 1) add(DayOfWeek.SATURDAY)
+                    if (sunday == 1) add(DayOfWeek.SUNDAY)
+                }
+                Service(
+                    id = service_id,
+                    days = days,
+                    start = LocalDate.parse(start_date, LocalDate.Formats.ISO_BASIC),
+                    end = LocalDate.parse(end_date, LocalDate.Formats.ISO_BASIC),
+                )
+            } }
+
+    private suspend fun addTrips(files: List<File>, services: Map<String, Service>): List<Trip> {
         val dao = db.tripDao
         log.info("parsing trips...")
         val trips = files
             .filter { it.name == "trips.txt" }
-            .flatMap { fd -> parseTrips(fd) }
+            .flatMap { fd -> parseTrips(fd, services) }
 
         log.info("inserting trips...")
         dao.deleteAll()
         dao.insertOrReplaceAll(*trips.map { it.asEntity() }.toTypedArray())
+
+        return trips
     }
 
-    private fun parseTrips(fd: File) =
+    private fun parseTrips(fd: File, services: Map<String, Service>) =
         fd.parseCsv<GtfsTrip>()
             .map { with(it) {
                 Trip(
                     id = trip_id,
                     routeId = route_id,
-                    serviceId = service_id,
+                    service = services[service_id]!!,
                     shapeId = shape_id.ifEmpty { null },
                     tripHeadsign = trip_headsign,
                     directionId = direction_id,

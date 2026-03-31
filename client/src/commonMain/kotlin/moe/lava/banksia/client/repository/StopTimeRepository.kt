@@ -1,13 +1,16 @@
 package moe.lava.banksia.client.repository
 
-import moe.lava.banksia.client.data.stoptime.StopTimePtvDataSource
-import moe.lava.banksia.model.StopTime
+import moe.lava.banksia.client.data.stoptime.StopTimeLocalDataSource
+import moe.lava.banksia.client.data.stoptime.StopTimeRemoteDataSource
+import moe.lava.banksia.model.StopTimeDated
 
 class StopTimeRepository(
-    private val ptv: StopTimePtvDataSource,
+    private val local: StopTimeLocalDataSource,
+    private val remote: StopTimeRemoteDataSource,
 ) {
-    // TODO
-    suspend fun getForStop(id: String): List<StopTime> {
-        return listOf()
+    suspend fun getForStop(id: String): List<StopTimeDated> {
+        return local
+            .getAtStop(id)
+            .ifEmpty { remote.getAtStop(id) }
     }
 }

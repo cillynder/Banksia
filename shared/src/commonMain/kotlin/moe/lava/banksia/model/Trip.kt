@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class Trip(
     val id: String,
     val routeId: String,
-    val serviceId: String,
+    val service: Service,
     val shapeId: String?,
     val tripHeadsign: String,
     val directionId: String,

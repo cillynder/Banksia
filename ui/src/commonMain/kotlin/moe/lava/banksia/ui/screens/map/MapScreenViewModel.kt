@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import moe.lava.banksia.client.repository.RouteRepository
 import moe.lava.banksia.client.repository.StopRepository
 import moe.lava.banksia.client.repository.StopTimeRepository
@@ -30,6 +32,8 @@ import moe.lava.banksia.util.BoxedValue.Companion.box
 import moe.lava.banksia.util.LoopFlow.Companion.waitUntilSubscribed
 import moe.lava.banksia.util.Point
 import moe.lava.banksia.util.log
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 
 sealed class MapScreenEvent {
     data object DismissState : MapScreenEvent()
@@ -223,28 +227,22 @@ class MapScreenViewModel(
         }
 
         val departures = stopTimeRepository.getForStop(id)
-            .filter { it.headsign != null }
+            .filter { !it.headsign.isNullOrBlank() }
             .groupBy { it.headsign!! }
             .map { (headsign, stopTimes) ->
-                InfoPanelState.Stop.Departure(headsign, "...")
-                // TODO
-//                val tmsF = stopTimes.map { time ->
-//                    val key = Pair(dep.directionId, dep.routeId)
-//                    val direction = ptvService.direction(dep.directionId, dep.routeId)
-//                    val route = res.routes[dep.routeId.toString()]
-//                    val prefix = route?.let { if (it.routeNumber == "") "" else "${it.routeNumber} - " } ?: ""
-//                    val element = timetable.getOrPut(key) { Pair(prefix + direction.directionName, mutableListOf()) }.second
-//                    if (element.size >= 5)
-//                        return@forEach
-//
-//                    val min = (time.departureTime.time - Clock.System.now()).inWholeMinutes
-//                    if (min <= -5)
-//                        return@forEach
-//                    if (min >= 65)
-//                        element.add("${((min + 30.0) / 60.0).toInt()}hr")
-//                    else
-//                        element.add("${min}mn")
-//                }
+                val now = Clock.System.now()
+                val times = stopTimes
+                    .map { it.arrivalTime.toInstant(TimeZone.currentSystemDefault()) }
+                    .filter { it >= (now - 1.minutes) }
+                    .joinToString(" | ") {
+                        val diff = (it - now).inWholeMinutes.coerceAtLeast(0)
+                        if (diff >= 65) {
+                            "${((diff + 30.0) / 60.0).toInt()}hr"
+                        } else {
+                            "${diff}mn"
+                        }
+                    }
+                InfoPanelState.Stop.Departure(headsign, times)
             }
         iInfoState.update {
             if (it !is InfoPanelState.Stop)

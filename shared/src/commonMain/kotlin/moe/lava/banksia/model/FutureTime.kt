@@ -1,6 +1,10 @@
 package moe.lava.banksia.model
 
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.atTime
+import kotlinx.datetime.plus
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -39,6 +43,10 @@ data class FutureTime(
     val minute = time.minute
     val second = time.second
     val trueHour = time.hour + (if (dayOffset) 24 else 0)
+
+    fun atDate(date: LocalDate) = date
+        .let { if (dayOffset) date.plus(1, DateTimeUnit.DAY) else date }
+        .atTime(time)
 }
 
 object FutureTimeSerialiser: KSerializer<FutureTime> {

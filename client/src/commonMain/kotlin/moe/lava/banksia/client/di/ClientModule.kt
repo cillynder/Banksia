@@ -12,7 +12,8 @@ import moe.lava.banksia.client.data.route.RouteLocalDataSource
 import moe.lava.banksia.client.data.route.RouteRemoteDataSource
 import moe.lava.banksia.client.data.stop.StopLocalDataSource
 import moe.lava.banksia.client.data.stop.StopRemoteDataSource
-import moe.lava.banksia.client.data.stoptime.StopTimePtvDataSource
+import moe.lava.banksia.client.data.stoptime.StopTimeLocalDataSource
+import moe.lava.banksia.client.data.stoptime.StopTimeRemoteDataSource
 import moe.lava.banksia.client.repository.RouteRepository
 import moe.lava.banksia.client.repository.StopRepository
 import moe.lava.banksia.client.repository.StopTimeRepository
@@ -48,7 +49,8 @@ val ClientModule = module {
     singleOf(::RouteRemoteDataSource)
     singleOf(::StopLocalDataSource)
     singleOf(::StopRemoteDataSource)
-    singleOf(::StopTimePtvDataSource)
+    singleOf(::StopTimeLocalDataSource)
+    singleOf(::StopTimeRemoteDataSource)
 
     // Repositories
     singleOf(::RouteRepository)

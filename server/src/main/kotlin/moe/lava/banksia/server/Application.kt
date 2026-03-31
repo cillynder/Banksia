@@ -15,17 +15,24 @@ import io.ktor.server.routing.routing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import moe.lava.banksia.Constants
 import moe.lava.banksia.di.CommonModules
+import moe.lava.banksia.model.atDate
 import moe.lava.banksia.room.dao.RouteDao
 import moe.lava.banksia.room.dao.StopDao
+import moe.lava.banksia.room.dao.StopTimeDao
 import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.server.di.ServerModules
 import moe.lava.banksia.server.gtfs.GtfsHandler
 import moe.lava.banksia.server.gtfsr.GtfsrService
+import moe.lava.banksia.util.serialise
 import org.koin.dsl.module
 import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
+import kotlin.time.Clock
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
@@ -41,8 +48,11 @@ fun Application.module() {
         modules(CommonModules, ServerModules)
     }
 
-    val gtfsr by inject<GtfsrService>()
-    launch { gtfsr.start() }
+    @Suppress("KotlinConstantConditions")
+    if (!Constants.devMode) {
+        val gtfsr by inject<GtfsrService>()
+        launch { gtfsr.start() }
+    }
 
     routing {
         get("/update") {
@@ -137,6 +147,24 @@ fun Application.module() {
 //                    .map { it.asModel() }
 //            }
 //            call.respond(stops)
+
+        }
+        get("/stoptimes/by_stop/{stop_id}") {
+            val stopId = call.parameters["stop_id"]!!
+            val date = call.queryParameters["date"]
+                ?.let { LocalDate.parse(it, LocalDate.Formats.ISO) }
+                ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
+            val times = withContext(context = Dispatchers.IO) {
+                inject<StopTimeDao>().value
+                    .getForStopDated(
+                        stopId,
+                        listOf(date.dayOfWeek).serialise(),
+                        date.toEpochDays().toInt(),
+                    )
+                    .map { it.asModel().atDate(date) }
+                    .sortedBy { it.departureTime }
+            }
+            call.respond(times)
         }
     }
 }
