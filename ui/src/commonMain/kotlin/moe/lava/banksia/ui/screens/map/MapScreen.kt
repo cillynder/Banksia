@@ -38,9 +38,9 @@ import moe.lava.banksia.ui.layout.AppBottomSheet
 import moe.lava.banksia.ui.layout.Searcher
 import moe.lava.banksia.ui.layout.SheetStateWrapper
 import moe.lava.banksia.ui.layout.info.InfoPanel
+import moe.lava.banksia.ui.layout.info.InfoPanelState
 import moe.lava.banksia.ui.map.Maps
 import moe.lava.banksia.ui.platform.BanksiaTheme
-import moe.lava.banksia.ui.state.InfoPanelState
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 

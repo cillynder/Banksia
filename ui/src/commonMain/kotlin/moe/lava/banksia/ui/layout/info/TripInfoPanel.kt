@@ -9,14 +9,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import moe.lava.banksia.model.RouteType
 import moe.lava.banksia.ui.components.RouteIcon
-import moe.lava.banksia.ui.screens.map.MapScreenEvent
-import moe.lava.banksia.ui.state.InfoPanelState
+
+sealed class TripInfoPanelEvent : InfoPanelEvent()
+
+data class TripInfoPanelState(
+    val direction: String,
+    val type: RouteType,
+    val routeName: String? = null,
+) : InfoPanelState() {
+    override val loading = routeName == null
+}
 
 @Composable
 internal fun TripInfoPanel(
-    state: InfoPanelState.Trip,
-    onEvent: (MapScreenEvent) -> Unit,
+    state: TripInfoPanelState,
+    onEvent: (TripInfoPanelEvent) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth()) {
         Row {

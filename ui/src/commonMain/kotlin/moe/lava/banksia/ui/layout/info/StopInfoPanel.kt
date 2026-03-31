@@ -16,13 +16,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import moe.lava.banksia.ui.screens.map.MapScreenEvent
-import moe.lava.banksia.ui.state.InfoPanelState
+
+sealed class StopInfoPanelEvent : InfoPanelEvent()
+
+data class StopInfoPanelState(
+    val id: String,
+    val name: String,
+    val subname: String? = null,
+    val departures: List<Departure>? = null,
+) : InfoPanelState() {
+    override val loading: Boolean
+        get() = departures == null
+
+    data class Departure(val directionName: String, val formattedTimes: String)
+}
 
 @Composable
 internal fun StopInfoPanel(
-    state: InfoPanelState.Stop,
-    onEvent: (MapScreenEvent) -> Unit,
+    state: StopInfoPanelState,
+    onEvent: (StopInfoPanelEvent) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth()) {
         Text(

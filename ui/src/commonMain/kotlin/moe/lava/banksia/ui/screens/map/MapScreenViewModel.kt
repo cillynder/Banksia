@@ -21,10 +21,14 @@ import moe.lava.banksia.client.repository.StopTimeRepository
 import moe.lava.banksia.data.ptv.PtvService
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.RouteType
+import moe.lava.banksia.ui.layout.info.InfoPanelEvent
+import moe.lava.banksia.ui.layout.info.InfoPanelState
+import moe.lava.banksia.ui.layout.info.RouteInfoPanelState
+import moe.lava.banksia.ui.layout.info.StopInfoPanelState
+import moe.lava.banksia.ui.layout.info.TripInfoPanelState
 import moe.lava.banksia.ui.map.util.CameraPosition
 import moe.lava.banksia.ui.map.util.CameraPositionBounds
 import moe.lava.banksia.ui.map.util.Marker
-import moe.lava.banksia.ui.state.InfoPanelState
 import moe.lava.banksia.ui.state.MapState
 import moe.lava.banksia.ui.state.SearchState
 import moe.lava.banksia.util.BoxedValue
@@ -99,6 +103,12 @@ class MapScreenViewModel(
         }
     }
 
+    fun handleEvent(event: InfoPanelEvent) {
+        viewModelScope.launch {
+//            when (event) { }
+        }
+    }
+
     fun bindTracker(locationTracker: LocationTracker) {
         locationTrackerJob = locationTracker.getLocationsFlow()
             .onEach { lastKnownLocation = Point(it.latitude, it.longitude) }
@@ -162,7 +172,7 @@ class MapScreenViewModel(
         val route = routeRepository.get(routeId)
 //        val gtfsRoute = ptvService.route(routeId)
         iInfoState.update {
-            InfoPanelState.Route(
+            RouteInfoPanelState(
                 name = route.name,
                 type = route.type,
             )
@@ -187,7 +197,7 @@ class MapScreenViewModel(
             .onEach { run ->
                 if (routeName == null) {
                     iInfoState.update {
-                        InfoPanelState.Trip(
+                        TripInfoPanelState(
                             direction = run.destinationName,
                             type = RouteType.MetroTrain, // XXX HACK TODO FIXME
                         )
@@ -196,7 +206,7 @@ class MapScreenViewModel(
                 }
 
                 iInfoState.update {
-                    InfoPanelState.Trip(
+                    TripInfoPanelState(
                         direction = run.destinationName,
                         type = RouteType.MetroTrain, // FIXME HACK XXX TODO
                         routeName = routeName,
@@ -219,7 +229,7 @@ class MapScreenViewModel(
         val name = split[0]
         val subname = split.getOrNull(1)
         iInfoState.update {
-            InfoPanelState.Stop(
+            StopInfoPanelState(
                 id = stop.id,
                 name = name,
                 subname = subname,
@@ -242,10 +252,10 @@ class MapScreenViewModel(
                             "${diff}mn"
                         }
                     }
-                InfoPanelState.Stop.Departure(headsign, times)
+                StopInfoPanelState.Departure(headsign, times)
             }
         iInfoState.update {
-            if (it !is InfoPanelState.Stop)
+            if (it !is StopInfoPanelState)
                 it
             else
                 it.copy(departures = departures)

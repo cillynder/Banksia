@@ -30,15 +30,23 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import moe.lava.banksia.ui.screens.map.MapScreenEvent
-import moe.lava.banksia.ui.state.InfoPanelState
 import kotlin.time.Duration.Companion.milliseconds
+
+sealed class InfoPanelEvent
+
+sealed class InfoPanelState {
+    abstract val loading: Boolean
+
+    data object None : InfoPanelState() {
+        override val loading = false
+    }
+}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InfoPanel(
     state: InfoPanelState,
-    onEvent: (MapScreenEvent) -> Unit,
+    onEvent: (InfoPanelEvent) -> Unit,
     onPeekHeightChange: (Dp) -> Unit,
 ) {
     if (state is InfoPanelState.None)
@@ -66,9 +74,9 @@ fun InfoPanel(
     ) {
         Box {
             when (state) {
-                is InfoPanelState.Route -> RouteInfoPanel(state, onEvent)
-                is InfoPanelState.Stop -> StopInfoPanel(state, onEvent)
-                is InfoPanelState.Trip -> TripInfoPanel(state, onEvent)
+                is RouteInfoPanelState -> RouteInfoPanel(state, onEvent)
+                is StopInfoPanelState -> StopInfoPanel(state, onEvent)
+                is TripInfoPanelState -> TripInfoPanel(state, onEvent)
                 is InfoPanelState.None -> throw UnsupportedOperationException()
             }
 
