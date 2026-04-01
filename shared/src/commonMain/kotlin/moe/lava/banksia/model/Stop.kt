@@ -8,7 +8,7 @@ data class Stop(
     val id: String,
     val name: String,
     val pos: Point,
-    val parent: String,
+    val parent: String?,
     val hasWheelChairBoarding: Boolean,
     val level: String,
     val platformCode: String,

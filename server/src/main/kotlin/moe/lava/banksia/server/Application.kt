@@ -54,6 +54,13 @@ fun Application.module() {
     }
 
     routing {
+        if (Constants.devMode) {
+            get("/fixup") {
+                call.respondText("received")
+                val fixer by inject<GtfsDataFixer>()
+                fixer.addParentsToStops()
+            }
+        }
         get("/update") {
             val key = call.parameters["key"]
             if (key != Constants.updateKey) {
@@ -66,8 +73,11 @@ fun Application.module() {
                 ?: "https://opendata.transport.vic.gov.au/dataset/3f4e292e-7f8a-4ffe-831f-1953be0fe448/resource/${datasetUuid}/download/gtfs.zip"
             call.respondText("received")
             launch(context = Dispatchers.IO) {
+                val fixer by inject<GtfsDataFixer>()
                 val importer by inject<GtfsImporter>()
                 importer.import(datasetUrl)
+
+                fixer.addParentsToStops()
             }
         }
 
@@ -123,7 +133,7 @@ fun Application.module() {
         }
         get("/route_stops/{route_id}") {
             val routeId = call.parameters["route_id"]!!
-            val useParent = call.queryParameters["parent"] in listOf("true", "1")
+            val useParent = call.queryParameters["parent"] !in listOf("false", "0")
             val stops = withContext(Dispatchers.IO) {
                 val routeDao by inject<RouteDao>()
                 if (useParent)

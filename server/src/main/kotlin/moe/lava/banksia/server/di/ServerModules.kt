@@ -1,6 +1,7 @@
 package moe.lava.banksia.server.di
 
 import io.ktor.client.HttpClient
+import moe.lava.banksia.server.GtfsDataFixer
 import moe.lava.banksia.server.GtfsImporter
 import moe.lava.banksia.server.gtfs.GtfsParser
 import moe.lava.banksia.server.gtfsrt.GtfsrtService
@@ -12,5 +13,6 @@ val ServerModules = module {
     singleOf(::GtfsParser)
     singleOf(::GtfsrtService)
 
+    singleOf(::GtfsDataFixer)
     singleOf(::GtfsImporter)
 }

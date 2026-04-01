@@ -12,6 +12,13 @@ interface StopDao {
     @Query("SELECT * FROM Stop")
     suspend fun getAll(): List<StopEntity>
 
+    @Query("""
+        SELECT * FROM Stop
+        WHERE platformCode <> ""
+        AND parent == ""
+    """)
+    suspend fun getAllParentless(): List<StopEntity>
+
     @Query("SELECT * FROM Stop WHERE id == :id")
     suspend fun get(id: String): StopEntity?
 
@@ -29,4 +36,7 @@ interface StopDao {
 
     @Query("DELETE FROM Stop")
     suspend fun deleteAll()
+
+    @Query("UPDATE Stop SET parent = :parent WHERE id IN (:ids)")
+    suspend fun updateParents(ids: List<String>, parent: String)
 }

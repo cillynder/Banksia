@@ -15,7 +15,7 @@ import moe.lava.banksia.model.Trip
         ForeignKey(ServiceEntity::class, parentColumns = ["id"], childColumns = ["serviceId"], onDelete = CASCADE),
         ForeignKey(ShapeEntity::class, parentColumns = ["id"], childColumns = ["shapeId"], onDelete = CASCADE),
     ],
-    indices = [Index("shapeId")],
+    indices = [Index("shapeId"), Index("serviceId")],
 )
 data class TripEntity(
     @PrimaryKey val id: String,

@@ -37,13 +37,22 @@ interface RouteDao {
     """)
     suspend fun stops(id: String): List<StopEntity>
 
+    // I vibecoded this, sorry
     @Query("""
-        SELECT Stop.* FROM Stop
-        INNER JOIN Stop Child ON Child.parent == Stop.id
-        INNER JOIN StopTime ON StopTime.stopId == Child.id
-        INNER JOIN Trip ON Trip.id == StopTime.tripId
-        WHERE Trip.routeId == :id
-        GROUP BY Stop.id
+        WITH Tree AS (
+            SELECT Stop.* FROM Stop
+            INNER JOIN StopTime ON StopTime.stopId == Stop.id
+            INNER JOIN Trip ON Trip.id == StopTime.tripId
+            WHERE Trip.routeId == :id
+            GROUP BY Stop.id
+
+            UNION ALL
+
+            SELECT s.*
+            FROM Stop s
+            INNER JOIN Tree t ON s.id = t.parent
+        )
+        SELECT DISTINCT * FROM Tree WHERE parent IS NULL;
     """)
     suspend fun stopsParent(id: String): List<StopEntity>
 }

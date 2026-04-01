@@ -27,7 +27,7 @@ interface StopTimeDao {
         INNER JOIN Trip ON Trip.serviceId == Service.id
         LEFT JOIN ServiceException ON ServiceException.serviceId == Service.id AND ServiceException.date == :date
         WHERE StopTime.tripId == Trip.id
-            AND StopTime.stopId == :stopId
+            AND StopTime.stopId IN (SELECT Stop.id FROM Stop WHERE Stop.parent == :stopId OR Stop.id == :stopId)
             AND ServiceException.type IS NULL
     """)
     suspend fun getForStopDated(stopId: String, days: Int, date: Int): List<StopTimeEntity>
