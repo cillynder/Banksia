@@ -39,4 +39,6 @@ dependencies {
     implementation(libs.sqlite.bundled)
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
+
+    implementation(projects.shared.room)
 }

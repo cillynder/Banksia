@@ -32,11 +32,12 @@ dependencyResolutionManagement {
 }
 
 include(":androidApp")
-include(":client")
 include(":server")
 include(":server:gtfs")
 include(":server:gtfs_rt")
 include(":shared")
+include(":shared:data")
+include(":shared:room")
 include(":ui")
 include(":ui:maps")
 include(":ui:shared")

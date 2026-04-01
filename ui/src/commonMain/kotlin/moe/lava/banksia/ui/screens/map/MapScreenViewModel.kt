@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import moe.lava.banksia.client.repository.RouteRepository
-import moe.lava.banksia.client.repository.StopRepository
-import moe.lava.banksia.client.repository.StopTimeRepository
+import moe.lava.banksia.core.data.repositories.RouteRepository
+import moe.lava.banksia.core.data.repositories.StopRepository
+import moe.lava.banksia.core.data.repositories.StopTimeRepository
 import moe.lava.banksia.data.ptv.PtvService
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.RouteType

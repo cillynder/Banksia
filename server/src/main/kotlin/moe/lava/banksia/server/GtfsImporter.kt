@@ -3,6 +3,8 @@ package moe.lava.banksia.server
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import io.ktor.util.logging.Logger
+import moe.lava.banksia.core.room.Database
+import moe.lava.banksia.core.room.entity.asEntity
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.Service
 import moe.lava.banksia.model.ServiceException
@@ -10,8 +12,6 @@ import moe.lava.banksia.model.Shape
 import moe.lava.banksia.model.Stop
 import moe.lava.banksia.model.StopTime
 import moe.lava.banksia.model.Trip
-import moe.lava.banksia.room.Database
-import moe.lava.banksia.room.entity.asEntity
 import moe.lava.banksia.server.gtfs.GtfsData
 import moe.lava.banksia.server.gtfs.GtfsParser
 import kotlin.time.Clock

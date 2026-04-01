@@ -19,12 +19,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import moe.lava.banksia.Constants
-import moe.lava.banksia.di.CommonModules
+import moe.lava.banksia.core.room.dao.RouteDao
+import moe.lava.banksia.core.room.dao.StopDao
+import moe.lava.banksia.core.room.dao.StopTimeDao
+import moe.lava.banksia.core.room.dao.VersionMetadataDao
 import moe.lava.banksia.model.atDate
-import moe.lava.banksia.room.dao.RouteDao
-import moe.lava.banksia.room.dao.StopDao
-import moe.lava.banksia.room.dao.StopTimeDao
-import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.server.di.ServerModules
 import moe.lava.banksia.server.gtfsrt.GtfsrtService
 import moe.lava.banksia.util.serialise
@@ -44,14 +43,12 @@ fun Application.module() {
     }
     install(Koin) {
         modules(module { single { log } })
-        modules(CommonModules, ServerModules)
+        modules(ServerModules)
     }
 
+    val gtfsr by inject<GtfsrtService>()
     @Suppress("KotlinConstantConditions")
-    if (!Constants.devMode) {
-        val gtfsr by inject<GtfsrtService>()
-        launch { gtfsr.start(this, true) }
-    }
+    launch { gtfsr.start(this, !Constants.devMode) }
 
     routing {
         if (Constants.devMode) {
