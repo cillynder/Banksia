@@ -132,21 +132,6 @@ fun Application.module() {
                     routeDao.stops(routeId)
             }
             call.respond(stops.map { it.asModel() })
-//            val stops = withContext(Dispatchers.IO) {
-//                val stopDao by inject<StopDao>()
-//                val stopTimeDao by inject<StopTimeDao>()
-//                val tripDao by inject<TripDao>()
-//
-//                tripDao.getByRoute(routeId)
-//                    .map { it.id }
-//                    .let { stopTimeDao.get(it) }
-//                    .flatMap { it.asModel().stopInfos }
-//                    .map { it.stopId }
-//                    .let { stopDao.get(it) }
-//                    .map { it.asModel() }
-//            }
-//            call.respond(stops)
-
         }
         get("/stoptimes/by_stop/{stop_id}") {
             val stopId = call.parameters["stop_id"]!!

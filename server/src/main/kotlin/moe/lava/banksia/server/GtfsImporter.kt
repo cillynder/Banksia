@@ -1,5 +1,7 @@
 package moe.lava.banksia.server
 
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import io.ktor.util.logging.Logger
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.Service
@@ -19,25 +21,29 @@ class GtfsImporter(
     private val log: Logger,
 ) {
     suspend fun import(url: String, date: Long = Clock.System.now().epochSeconds) {
-        database.routeDao.deleteAll()
-        database.serviceDao.deleteAll()
-        database.shapeDao.deleteAll()
-        database.stopDao.deleteAll()
-        database.stopTimeDao.deleteAll()
-        database.tripDao.deleteAll()
+        database.useWriterConnection { transactor ->
+            transactor.immediateTransaction {
+                database.routeDao.deleteAll()
+                database.serviceDao.deleteAll()
+                database.shapeDao.deleteAll()
+                database.stopDao.deleteAll()
+                database.stopTimeDao.deleteAll()
+                database.tripDao.deleteAll()
 
-        parser.update(url).collect { chunk ->
-            when (chunk) {
-                is GtfsData.RouteChunk -> addRoutes(chunk.routes)
-                is GtfsData.ServiceChunk -> addServices(chunk.services)
-                is GtfsData.ShapeChunk -> addShapes(chunk.shapes)
-                is GtfsData.StopChunk -> addStops(chunk.stops)
-                is GtfsData.StopTimeChunk ->  addStopTimes(chunk.stopTimes)
-                is GtfsData.TripChunk -> addTrips(chunk.trips)
+                parser.update(url).collect { chunk ->
+                    when (chunk) {
+                        is GtfsData.RouteChunk -> addRoutes(chunk.routes)
+                        is GtfsData.ServiceChunk -> addServices(chunk.services)
+                        is GtfsData.ShapeChunk -> addShapes(chunk.shapes)
+                        is GtfsData.StopChunk -> addStops(chunk.stops)
+                        is GtfsData.StopTimeChunk ->  addStopTimes(chunk.stopTimes)
+                        is GtfsData.TripChunk -> addTrips(chunk.trips)
+                    }
+                }
+
+                updateMetadata(date)
             }
         }
-
-        updateMetadata(date)
     }
 
     private suspend fun updateMetadata(date: Long) {
