@@ -22,11 +22,13 @@ interface StopTimeDao {
     suspend fun getForStop(stopId: String): List<StopTimeEntity>
 
     @Query("""
-        SELECT * FROM StopTime
+        SELECT DISTINCT StopTime.* FROM StopTime
         INNER JOIN Service ON Service.days & :days = :days AND :date BETWEEN Service.start AND Service.`end`
         INNER JOIN Trip ON Trip.serviceId == Service.id
+        LEFT JOIN ServiceException ON ServiceException.serviceId == Service.id AND ServiceException.date == :date
         WHERE StopTime.tripId == Trip.id
-        AND StopTime.stopId == :stopId
+            AND StopTime.stopId == :stopId
+            AND ServiceException.type IS NULL
     """)
     suspend fun getForStopDated(stopId: String, days: Int, date: Int): List<StopTimeEntity>
 

@@ -10,6 +10,7 @@ val CommonModules = module {
     single { get<Database>().versionMetadataDao }
     single { get<Database>().routeDao }
     single { get<Database>().serviceDao }
+    single { get<Database>().serviceExceptionDao }
     single { get<Database>().shapeDao }
     single { get<Database>().stopDao }
     single { get<Database>().stopTimeDao }

@@ -5,6 +5,7 @@ import androidx.room.useWriterConnection
 import io.ktor.util.logging.Logger
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.Service
+import moe.lava.banksia.model.ServiceException
 import moe.lava.banksia.model.Shape
 import moe.lava.banksia.model.Stop
 import moe.lava.banksia.model.StopTime
@@ -25,6 +26,7 @@ class GtfsImporter(
             transactor.immediateTransaction {
                 database.routeDao.deleteAll()
                 database.serviceDao.deleteAll()
+                database.serviceExceptionDao.deleteAll()
                 database.shapeDao.deleteAll()
                 database.stopDao.deleteAll()
                 database.stopTimeDao.deleteAll()
@@ -34,6 +36,7 @@ class GtfsImporter(
                     when (chunk) {
                         is GtfsData.RouteChunk -> addRoutes(chunk.routes)
                         is GtfsData.ServiceChunk -> addServices(chunk.services)
+                        is GtfsData.ServiceExceptionChunk -> addServiceExceptions(chunk.exceptions)
                         is GtfsData.ShapeChunk -> addShapes(chunk.shapes)
                         is GtfsData.StopChunk -> addStops(chunk.stops)
                         is GtfsData.StopTimeChunk -> addStopTimes(chunk.stopTimes)
@@ -64,6 +67,13 @@ class GtfsImporter(
         val dao = database.serviceDao
         log.info("inserting services...")
         dao.insertOrReplaceAll(*services.map { it.asEntity() }.toTypedArray())
+        log.info("done")
+    }
+
+    private suspend fun addServiceExceptions(exceptions: List<ServiceException>) {
+        val dao = database.serviceExceptionDao
+        log.info("inserting exceptions...")
+        dao.insertOrReplaceAll(*exceptions.map { it.asEntity() }.toTypedArray())
         log.info("done")
     }
 

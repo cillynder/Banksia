@@ -21,12 +21,14 @@ import moe.lava.banksia.Constants
 import moe.lava.banksia.model.Route
 import moe.lava.banksia.model.RouteType
 import moe.lava.banksia.model.Service
+import moe.lava.banksia.model.ServiceException
 import moe.lava.banksia.model.Shape
 import moe.lava.banksia.model.Stop
 import moe.lava.banksia.model.StopTime
 import moe.lava.banksia.model.Trip
 import moe.lava.banksia.server.gtfs.structures.GtfsRoute
 import moe.lava.banksia.server.gtfs.structures.GtfsService
+import moe.lava.banksia.server.gtfs.structures.GtfsServiceException
 import moe.lava.banksia.server.gtfs.structures.GtfsShape
 import moe.lava.banksia.server.gtfs.structures.GtfsStop
 import moe.lava.banksia.server.gtfs.structures.GtfsStopTime
@@ -39,6 +41,7 @@ import kotlin.time.ExperimentalTime
 sealed class GtfsData {
     data class RouteChunk(val routes: List<Route>) : GtfsData()
     data class ServiceChunk(val services: List<Service>) : GtfsData()
+    data class ServiceExceptionChunk(val exceptions: List<ServiceException>) : GtfsData()
     data class ShapeChunk(val shapes: List<Shape>) : GtfsData()
     data class StopChunk(val stops: List<Stop>) : GtfsData()
     data class StopTimeChunk(val stopTimes: List<StopTime>) : GtfsData()
@@ -77,7 +80,7 @@ class GtfsParser(
                 .listFiles { it.isDirectory }
                 .flatMap { d -> d.listFiles { f -> f.extension == "txt" }.toList() }
                 .ifEmpty { extractAll(datasetPath) }
-                .filter { it.parentFile.name == "2" }
+//                .filter { it.parentFile.name == "2" }
         } else {
             extractAll(datasetPath)
         }
@@ -114,6 +117,10 @@ class GtfsParser(
                     .also { emit(GtfsData.ServiceChunk(it)) }
             }
             .associateBy { it.id }
+
+        files
+            .filter { it.name == "calendar_dates.txt" }
+            .forEach { emit(GtfsData.ServiceExceptionChunk(parseServiceExceptions(it))) }
 
         val trips = files
             .filter { it.name == "trips.txt" }
@@ -204,6 +211,16 @@ class GtfsParser(
                     days = days,
                     start = LocalDate.parse(start_date, LocalDate.Formats.ISO_BASIC),
                     end = LocalDate.parse(end_date, LocalDate.Formats.ISO_BASIC),
+                )
+            } }
+
+    private fun parseServiceExceptions(fd: File) =
+        fd.parseCsv<GtfsServiceException>()
+            .map { with(it) {
+                ServiceException(
+                    serviceId = service_id,
+                    date = LocalDate.parse(date, LocalDate.Formats.ISO_BASIC),
+                    type = exception_type,
                 )
             } }
 

@@ -9,6 +9,7 @@ import kotlinx.coroutines.IO
 import moe.lava.banksia.room.converter.RouteTypeConverter
 import moe.lava.banksia.room.dao.RouteDao
 import moe.lava.banksia.room.dao.ServiceDao
+import moe.lava.banksia.room.dao.ServiceExceptionDao
 import moe.lava.banksia.room.dao.ShapeDao
 import moe.lava.banksia.room.dao.StopDao
 import moe.lava.banksia.room.dao.StopTimeDao
@@ -16,6 +17,7 @@ import moe.lava.banksia.room.dao.TripDao
 import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.room.entity.RouteEntity
 import moe.lava.banksia.room.entity.ServiceEntity
+import moe.lava.banksia.room.entity.ServiceExceptionEntity
 import moe.lava.banksia.room.entity.ShapeEntity
 import moe.lava.banksia.room.entity.StopEntity
 import moe.lava.banksia.room.entity.StopTimeEntity
@@ -24,10 +26,11 @@ import moe.lava.banksia.room.entity.VersionMetadataEntity
 import androidx.room.Database as DatabaseAnnotation
 
 @DatabaseAnnotation(
-    version = 9,
+    version = 10,
     entities = [
         RouteEntity::class,
         ServiceEntity::class,
+        ServiceExceptionEntity::class,
         ShapeEntity::class,
         StopEntity::class,
         StopTimeEntity::class,
@@ -37,6 +40,7 @@ import androidx.room.Database as DatabaseAnnotation
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
+        AutoMigration(from = 9, to = 10),
     ]
 )
 @TypeConverters(RouteTypeConverter::class)
@@ -44,6 +48,7 @@ abstract class Database : RoomDatabase() {
     abstract val versionMetadataDao: VersionMetadataDao
     abstract val routeDao: RouteDao
     abstract val serviceDao: ServiceDao
+    abstract val serviceExceptionDao: ServiceExceptionDao
     abstract val shapeDao: ShapeDao
     abstract val stopDao: StopDao
     abstract val stopTimeDao: StopTimeDao
