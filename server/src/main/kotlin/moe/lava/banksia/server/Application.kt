@@ -26,7 +26,7 @@ import moe.lava.banksia.room.dao.StopDao
 import moe.lava.banksia.room.dao.StopTimeDao
 import moe.lava.banksia.room.dao.VersionMetadataDao
 import moe.lava.banksia.server.di.ServerModules
-import moe.lava.banksia.server.gtfsr.GtfsrService
+import moe.lava.banksia.server.gtfsrt.GtfsrtService
 import moe.lava.banksia.util.serialise
 import org.koin.dsl.module
 import org.koin.ktor.ext.inject
@@ -49,8 +49,8 @@ fun Application.module() {
 
     @Suppress("KotlinConstantConditions")
     if (!Constants.devMode) {
-        val gtfsr by inject<GtfsrService>()
-        launch { gtfsr.start() }
+        val gtfsr by inject<GtfsrtService>()
+        launch { gtfsr.start(this, true) }
     }
 
     routing {

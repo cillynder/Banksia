@@ -7,6 +7,7 @@ plugins {
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+        freeCompilerArgs.add("-Xexplicit-backing-fields")
     }
 }
 
@@ -25,7 +26,7 @@ dependencies {
 
 wire {
     sourcePath {
-        srcDir("src/commonMain/proto")
+        srcDir("src/main/proto")
     }
     kotlin {}
 }

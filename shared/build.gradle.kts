@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
-    alias(libs.plugins.wire)
 }
 
 room {
@@ -61,11 +60,4 @@ dependencies {
     add("kspIosArm64", libs.room.compiler)
     add("kspIosSimulatorArm64", libs.room.compiler)
     add("kspJvm", libs.room.compiler)
-}
-
-wire {
-    sourcePath {
-        srcDir("src/commonMain/proto")
-    }
-    kotlin {}
 }

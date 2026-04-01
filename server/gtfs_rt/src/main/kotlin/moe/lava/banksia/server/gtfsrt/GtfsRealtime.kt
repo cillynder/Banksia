@@ -1,4 +1,4 @@
-package moe.lava.banksia.data.gtfsr
+package moe.lava.banksia.server.gtfsrt
 
 import com.google.transit.realtime.FeedMessage
 
