@@ -2,7 +2,7 @@ package moe.lava.banksia.server
 
 import moe.lava.banksia.core.room.Database
 import moe.lava.banksia.core.room.entity.StopEntity
-import moe.lava.banksia.util.log
+import moe.lava.banksia.core.util.log
 import java.security.MessageDigest
 
 class GtfsDataFixer(

@@ -19,7 +19,8 @@ kotlin {
 }
 
 dependencies {
-    implementation(projects.shared)
+    implementation(projects.core)
+    implementation(projects.core.room)
     implementation(projects.server.gtfs)
     implementation(projects.server.gtfsRt)
 
@@ -39,6 +40,4 @@ dependencies {
     implementation(libs.sqlite.bundled)
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
-
-    implementation(projects.shared.room)
 }

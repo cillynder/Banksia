@@ -3,7 +3,6 @@ package moe.lava.banksia.ui
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
-import moe.lava.banksia.di.coreDiModule
 import moe.lava.banksia.ui.di.AppModule
 import moe.lava.banksia.ui.screens.map.MapScreen
 import org.koin.compose.KoinMultiplatformApplication
@@ -14,7 +13,7 @@ import org.koin.dsl.koinConfiguration
 @Composable
 fun App() {
     KoinMultiplatformApplication(config = koinConfiguration {
-        modules(coreDiModule, AppModule)
+        modules(AppModule)
     }) {
         MapScreen()
     }

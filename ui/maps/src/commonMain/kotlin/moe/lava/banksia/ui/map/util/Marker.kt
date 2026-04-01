@@ -1,8 +1,8 @@
 package moe.lava.banksia.ui.map.util
 
 import kotlinx.serialization.Serializable
-import moe.lava.banksia.model.RouteType
-import moe.lava.banksia.util.Point
+import moe.lava.banksia.core.model.RouteType
+import moe.lava.banksia.core.util.Point
 
 @Serializable
 sealed class Marker {

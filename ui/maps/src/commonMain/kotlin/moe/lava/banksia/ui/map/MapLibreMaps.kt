@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
-import moe.lava.banksia.Constants
+import moe.lava.banksia.core.Constants
 import moe.lava.banksia.ui.map.mappers.routeColorExpression
 import moe.lava.banksia.ui.platform.BanksiaTheme
 import org.maplibre.compose.camera.CameraPosition

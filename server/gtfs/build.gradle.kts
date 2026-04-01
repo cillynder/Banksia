@@ -11,7 +11,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(projects.shared)
+    implementation(projects.core)
     implementation(libs.kotlinx.serialization.csv)
     implementation(libs.kotlinx.datetime)
     implementation(libs.ktor.client.contentnegotiation)

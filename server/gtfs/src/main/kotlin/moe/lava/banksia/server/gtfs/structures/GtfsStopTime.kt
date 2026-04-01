@@ -1,7 +1,7 @@
 package moe.lava.banksia.server.gtfs.structures
 
 import kotlinx.serialization.Serializable
-import moe.lava.banksia.model.FutureTime
+import moe.lava.banksia.core.model.FutureTime
 
 @Suppress("PropertyName")
 @Serializable

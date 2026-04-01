@@ -11,10 +11,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import moe.lava.banksia.model.RouteType
-import moe.lava.banksia.model.RouteType.MetroBus
-import moe.lava.banksia.model.RouteType.MetroTrain
-import moe.lava.banksia.model.RouteType.MetroTram
+import moe.lava.banksia.core.model.RouteType
+import moe.lava.banksia.core.model.RouteType.MetroBus
+import moe.lava.banksia.core.model.RouteType.MetroTrain
+import moe.lava.banksia.core.model.RouteType.MetroTram
 import moe.lava.banksia.ui.extensions.getUIProperties
 import org.jetbrains.compose.resources.painterResource
 

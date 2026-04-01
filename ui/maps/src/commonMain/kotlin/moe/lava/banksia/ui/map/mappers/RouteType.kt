@@ -1,7 +1,7 @@
 package moe.lava.banksia.ui.map.mappers
 
 import androidx.compose.runtime.Composable
-import moe.lava.banksia.model.RouteType
+import moe.lava.banksia.core.model.RouteType
 import moe.lava.banksia.ui.extensions.getUIProperties
 import moe.lava.banksia.ui.platform.BanksiaTheme
 import org.maplibre.compose.expressions.dsl.case

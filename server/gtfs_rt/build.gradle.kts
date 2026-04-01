@@ -12,7 +12,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(projects.shared)
+    implementation(projects.core)
     implementation(libs.okio)
     implementation(libs.koin.core)
     implementation(libs.ktor.client.core)

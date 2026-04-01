@@ -67,8 +67,8 @@ kotlin {
             implementation(libs.moko.geo.compose)
             implementation(libs.ui.backhandler)
 
-            implementation(projects.shared)
-            implementation(projects.shared.data)
+            implementation(projects.core)
+            implementation(projects.core.data)
             implementation(projects.ui.maps)
             implementation(projects.ui.shared)
         }

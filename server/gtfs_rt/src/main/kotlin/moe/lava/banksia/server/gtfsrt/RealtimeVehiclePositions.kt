@@ -1,7 +1,7 @@
 package moe.lava.banksia.server.gtfsrt
 
 import com.google.transit.realtime.FeedMessage
-import moe.lava.banksia.util.Point
+import moe.lava.banksia.core.util.Point
 
 class RealtimeVehiclePositions(data: FeedMessage) : GtfsRealtime(data) {
     private val positions = mutableMapOf<String, Point>()

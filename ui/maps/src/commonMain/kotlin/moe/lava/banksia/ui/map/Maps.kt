@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import moe.lava.banksia.core.util.Point
 import moe.lava.banksia.ui.map.mappers.asFeatures
 import moe.lava.banksia.ui.map.mappers.toPosition
 import moe.lava.banksia.ui.map.util.Marker
 import moe.lava.banksia.ui.platform.BanksiaTheme
-import moe.lava.banksia.util.Point
 
 internal val MELBOURNE = Point(-37.8136, 144.9631)
 internal val MELBOURNE_POS = MELBOURNE.toPosition()

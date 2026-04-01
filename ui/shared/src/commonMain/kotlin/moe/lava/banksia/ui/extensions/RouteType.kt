@@ -1,8 +1,8 @@
 package moe.lava.banksia.ui.extensions
 
 import androidx.compose.ui.graphics.Color
+import moe.lava.banksia.core.model.RouteType
 import moe.lava.banksia.data.ptv.structures.PtvRouteType
-import moe.lava.banksia.model.RouteType
 import moe.lava.banksia.resources.Res
 import moe.lava.banksia.resources.bus
 import moe.lava.banksia.resources.bus_background

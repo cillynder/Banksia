@@ -49,7 +49,7 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
 
-            implementation(projects.shared)
+            implementation(projects.core)
             implementation(projects.ui.shared)
         }
     }

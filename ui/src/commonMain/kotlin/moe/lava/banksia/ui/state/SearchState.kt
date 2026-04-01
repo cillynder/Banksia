@@ -1,6 +1,6 @@
 package moe.lava.banksia.ui.state
 
-import moe.lava.banksia.model.RouteType
+import moe.lava.banksia.core.model.RouteType
 
 data class SearchState(
     val entries: List<SearchEntry> = listOf(),

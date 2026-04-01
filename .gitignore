@@ -18,6 +18,6 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 secrets.properties
-shared/src/commonMain/kotlin/moe/lava/banksia/Constants.kt
+/core/src/commonMain/kotlin/moe/lava/banksia/core/Constants.kt
 /data/
 /data

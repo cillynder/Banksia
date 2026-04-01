@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import moe.lava.banksia.util.Point
+import moe.lava.banksia.core.util.Point
 
 class MapsPositionState internal constructor(
     private val scope: CoroutineScope

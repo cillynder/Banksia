@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import moe.lava.banksia.Constants
-import moe.lava.banksia.util.LogScope
-import moe.lava.banksia.util.log
+import moe.lava.banksia.core.Constants
+import moe.lava.banksia.core.util.LogScope
+import moe.lava.banksia.core.util.log
 
 private val types = arrayOf(
     "metro/trip-updates",

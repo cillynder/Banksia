@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import moe.lava.banksia.model.RouteType
+import moe.lava.banksia.core.model.RouteType
 import moe.lava.banksia.ui.components.RouteIcon
 
 sealed class TripInfoPanelEvent : InfoPanelEvent()

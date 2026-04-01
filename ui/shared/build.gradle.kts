@@ -35,7 +35,7 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.compose.ui.tooling.preview)
 
-            implementation(projects.shared)
+            implementation(projects.core)
         }
     }
 }

@@ -1,7 +1,7 @@
 package moe.lava.banksia.ui.map.mappers
 
 import kotlinx.serialization.Serializable
-import moe.lava.banksia.model.RouteType
+import moe.lava.banksia.core.model.RouteType
 import moe.lava.banksia.ui.map.util.Marker
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.spatialk.geojson.FeatureCollection
