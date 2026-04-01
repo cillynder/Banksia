@@ -36,7 +36,7 @@ class GtfsImporter(
                         is GtfsData.ServiceChunk -> addServices(chunk.services)
                         is GtfsData.ShapeChunk -> addShapes(chunk.shapes)
                         is GtfsData.StopChunk -> addStops(chunk.stops)
-                        is GtfsData.StopTimeChunk ->  addStopTimes(chunk.stopTimes)
+                        is GtfsData.StopTimeChunk -> addStopTimes(chunk.stopTimes)
                         is GtfsData.TripChunk -> addTrips(chunk.trips)
                     }
                 }
@@ -50,24 +50,28 @@ class GtfsImporter(
         val dao = database.versionMetadataDao
         log.info("updating metadata...")
         dao.update(date, listOf("routes", "stops", "shapes", "trips", "stop_times"))
+        log.info("done")
     }
 
     private suspend fun addRoutes(routes: List<Route>) {
         val dao = database.routeDao
         log.info("inserting routes...")
         dao.insertOrReplaceAll(*routes.map { it.asEntity() }.toTypedArray())
+        log.info("done")
     }
 
     private suspend fun addServices(services: List<Service>) {
         val dao = database.serviceDao
         log.info("inserting services...")
         dao.insertOrReplaceAll(*services.map { it.asEntity() }.toTypedArray())
+        log.info("done")
     }
 
     private suspend fun addShapes(shapes: List<Shape>) {
         val dao = database.shapeDao
         log.info("inserting shapes...")
         dao.insertOrReplaceAll(*shapes.map { it.asEntity() }.toTypedArray())
+        log.info("done")
     }
 
     private suspend fun addStops(stops: List<Stop>) {
@@ -85,17 +89,20 @@ class GtfsImporter(
                 }
             }
         dao.insertOrReplaceAll(*stops.map { it.asEntity() }.toTypedArray())
+        log.info("done")
     }
 
     private suspend fun addStopTimes(stopTimes: List<StopTime>) {
         val dao = database.stopTimeDao
         log.info("inserting ${stopTimes.size} stoptimes...")
         dao.insertOrReplaceAll(*stopTimes.map { it.asEntity() }.toTypedArray())
+        log.info("done")
     }
 
     private suspend fun addTrips(trips: List<Trip>) {
         val dao = database.tripDao
         log.info("inserting ${trips.size} trips...")
         dao.insertOrReplaceAll(*trips.map { it.asEntity() }.toTypedArray())
+        log.info("done")
     }
 }
