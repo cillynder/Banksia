@@ -40,6 +40,7 @@ import moe.lava.banksia.ui.layout.SheetStateWrapper
 import moe.lava.banksia.ui.layout.info.InfoPanel
 import moe.lava.banksia.ui.layout.info.InfoPanelState
 import moe.lava.banksia.ui.map.Maps
+import moe.lava.banksia.ui.map.rememberMapsPositionState
 import moe.lava.banksia.ui.platform.BanksiaTheme
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -64,6 +65,13 @@ fun MapScreen(
     val sheetState = SheetStateWrapper.create()
     var searchExpandedState by rememberSaveable { mutableStateOf(false) }
 
+    val mapsPositionState = rememberMapsPositionState()
+    scope.launch {
+        viewModel.cameraChangeEmitter.collect {
+            mapsPositionState.update(it.value)
+        }
+    }
+
     LaunchedEffect(infoState) {
         if (infoState !is InfoPanelState.None) {
             sheetState.peek()
@@ -80,6 +88,7 @@ fun MapScreen(
                     SearchBarDefaults.InputFieldHeight.roundToPx()
                 }, bottom = sheetState.bottomInset),
                 stops = mapState.stops,
+                positionState = mapsPositionState,
 //                vehicles = mapState.vehicles,
                 onStopClicked = { stop ->
                     viewModel.handleEvent(MapScreenEvent.SelectStop(stop))

@@ -7,16 +7,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import moe.lava.banksia.core.util.Point
+import moe.lava.banksia.ui.map.util.CameraPosition
 
 class MapsPositionState internal constructor(
     private val scope: CoroutineScope
 ) {
-    internal val updates: SharedFlow<Point>
+    internal val updates: SharedFlow<CameraPosition>
         field = MutableSharedFlow()
 
-    fun update(position: Point) {
-        scope.launch { updates.emit(position) }
+    fun update(position: CameraPosition) {
+        scope.launch {
+            updates.emit(position)
+        }
     }
 }
 

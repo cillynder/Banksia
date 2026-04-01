@@ -116,11 +116,6 @@ class MapScreenViewModel(
     }
 
     fun centreCameraToLocation() {
-        viewModelScope.launch {
-            log("msvm", "getting..")
-            val routes = routeRepository.getAll()
-            log("msvm", routes.joinToString("\n"))
-        }
         lastKnownLocation?.let { location ->
             viewModelScope.launch {
                 log("bvm", "emitting $location")
