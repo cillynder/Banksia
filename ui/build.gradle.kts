@@ -68,7 +68,7 @@ kotlin {
             implementation(libs.ui.backhandler)
 
             implementation(projects.core)
-            implementation(projects.core.data)
+            implementation(projects.core.data.client)
             implementation(projects.ui.maps)
             implementation(projects.ui.shared)
         }

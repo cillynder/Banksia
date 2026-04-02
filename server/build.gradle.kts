@@ -5,7 +5,7 @@ plugins {
     application
 }
 
-group = "moe.lava.banksia"
+group = "moe.lava.banksia.server"
 version = "1.0.0"
 application {
     mainClass.set("moe.lava.banksia.server.ApplicationKt")
