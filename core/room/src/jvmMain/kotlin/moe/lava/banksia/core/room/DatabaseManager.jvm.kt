@@ -25,17 +25,17 @@ actual class DatabaseManager : KoinComponent {
     fun makeAlt() = Database.build(getBuilder("./data/room_alt.db"))
 
     private fun deleteAll(file: File): Boolean {
-        val r1 = file.delete()
-        val r2 = File(file.parentFile, file.name + ".lck").delete()
-        val r3 = File(file.parentFile, file.name + "-journal").delete()
-        return r1 && r2 && r3
+        val r1 = file.takeIf { it.exists() }?.delete()
+        val r2 = File(file.parentFile, file.name + ".lck").takeIf { it.exists() }?.delete()
+        val r3 = File(file.parentFile, file.name + "-journal").takeIf { it.exists() }?.delete()
+        return r1 != false && r2 != false && r3 != false
     }
 
     private fun renameAll(from: File, to: File): Boolean {
-        val r1 = from.renameTo(to)
-        val r2 = File(from.parentFile, from.name + ".lck").renameTo(File(to.parentFile, to.name + ".lck"))
-        val r3 = File(from.parentFile, from.name + "-journal").renameTo(File(to.parentFile, to.name + "-journal"))
-        return r1 && r2 && r3
+        val r1 = from.takeIf { it.exists() }?.renameTo(to)
+        val r2 = File(from.parentFile, from.name + ".lck").takeIf { it.exists() }?.renameTo(File(to.parentFile, to.name + ".lck"))
+        val r3 = File(from.parentFile, from.name + "-journal").takeIf { it.exists() }?.renameTo(File(to.parentFile, to.name + "-journal"))
+        return r1 != false && r2 != false && r3 != false
     }
 
     fun swap(scope: CoroutineScope = CoroutineScope(Dispatchers.IO)) {
