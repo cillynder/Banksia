@@ -31,7 +31,7 @@ class GtfsDataFixer(
                 )
                 log("datafixer", "inserting ${parentId} for ${stops.size} children")
                 dao.insertAll(parent)
-                database.stopDao.updateParents(stops.map { it.id }, parentId)
+                dao.updateParents(stops.map { it.id }, parentId)
             }
     }
 }

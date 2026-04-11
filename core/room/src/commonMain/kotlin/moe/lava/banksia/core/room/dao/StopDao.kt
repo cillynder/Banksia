@@ -15,7 +15,7 @@ interface StopDao {
     @Query("""
         SELECT * FROM Stop
         WHERE platformCode <> ""
-        AND parent == ""
+        AND parent IS NULL
     """)
     suspend fun getAllParentless(): List<StopEntity>
 
