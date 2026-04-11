@@ -170,7 +170,7 @@ class GtfsParser(
                     id = stop_id,
                     name = stop_name,
                     pos = Point(stop_lat, stop_lon),
-                    parent = parent_station,
+                    parent = parent_station.ifEmpty { null },
                     hasWheelChairBoarding = wheelchair_boarding == "1",
                     level = level_id,
                     platformCode = platform_code,
