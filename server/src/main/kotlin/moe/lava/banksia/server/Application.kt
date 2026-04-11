@@ -56,7 +56,19 @@ fun Application.module() {
                 get<GtfsDataFixer>().addParentsToStops()
             }
         }
-        get("/update") {
+        get("/manage/fixup") {
+            val key = call.parameters["key"]
+            if (key != Constants.updateKey) {
+                call.respond(HttpStatusCode.Forbidden)
+                return@get
+            }
+
+            call.respondText("fixing")
+            launch(context = Dispatchers.IO) {
+                get<GtfsDataFixer>().addParentsToStops()
+            }
+        }
+        get("/manage/update") {
             val key = call.parameters["key"]
             if (key != Constants.updateKey) {
                 call.respond(HttpStatusCode.Forbidden)
