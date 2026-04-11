@@ -24,7 +24,7 @@ class GtfsDataFixer(
                     name = name,
                     lat = avgLat,
                     lng = avgLng,
-                    parent = "",
+                    parent = null,
                     hasWheelChairBoarding = stops.all { it.hasWheelChairBoarding },
                     level = "",
                     platformCode = "",

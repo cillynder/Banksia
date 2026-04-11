@@ -28,7 +28,7 @@ import moe.lava.banksia.core.util.serialise
 import moe.lava.banksia.server.di.ServerModules
 import moe.lava.banksia.server.gtfsrt.GtfsrtService
 import org.koin.dsl.module
-import org.koin.ktor.ext.inject
+import org.koin.ktor.ext.get
 import org.koin.ktor.plugin.Koin
 import kotlin.time.Clock
 
@@ -46,16 +46,14 @@ fun Application.module() {
         modules(ServerModules)
     }
 
-    val gtfsr by inject<GtfsrtService>()
     @Suppress("KotlinConstantConditions")
-    launch { gtfsr.start(this, !Constants.devMode) }
+    launch { get<GtfsrtService>().start(this, !Constants.devMode) }
 
     routing {
         if (Constants.devMode) {
             get("/fixup") {
                 call.respondText("received")
-                val fixer by inject<GtfsDataFixer>()
-                fixer.addParentsToStops()
+                get<GtfsDataFixer>().addParentsToStops()
             }
         }
         get("/update") {
@@ -70,16 +68,13 @@ fun Application.module() {
                 ?: "https://opendata.transport.vic.gov.au/dataset/3f4e292e-7f8a-4ffe-831f-1953be0fe448/resource/${datasetUuid}/download/gtfs.zip"
             call.respondText("received")
             launch(context = Dispatchers.IO) {
-                val fixer by inject<GtfsDataFixer>()
-                val importer by inject<GtfsImporter>()
-                importer.import(datasetUrl)
-
-                fixer.addParentsToStops()
+                get<GtfsImporter>().import(datasetUrl)
+                get<GtfsDataFixer>().addParentsToStops()
             }
         }
 
         get("/metadata/{type?}") {
-            val dao by inject<VersionMetadataDao>()
+            val dao = get<VersionMetadataDao>()
             val type = call.parameters["type"]
             if (type == null) {
                 call.respond(dao.getAll().map { it.asModel() })
@@ -96,7 +91,7 @@ fun Application.module() {
 
         get("/routes") {
             val routes = withContext(context = Dispatchers.IO) {
-                inject<RouteDao>().value.getAll()
+                get<RouteDao>().getAll()
             }
             val res = routes.map { it.asModel() }
             call.respond(res)
@@ -104,7 +99,7 @@ fun Application.module() {
         get("/routes/{route_id}") {
             val routeId = call.parameters["route_id"]!!
             val route = withContext(context = Dispatchers.IO) {
-                inject<RouteDao>().value.get(routeId)
+                get<RouteDao>().get(routeId)
             }
             if (route != null)
                 call.respond(route.asModel())
@@ -113,7 +108,7 @@ fun Application.module() {
         }
         get("/stops") {
             val routes = withContext(context = Dispatchers.IO) {
-                inject<StopDao>().value.getAll()
+                get<StopDao>().getAll()
             }
             val res = routes.map { it.asModel() }
             call.respond(res)
@@ -121,7 +116,7 @@ fun Application.module() {
         get("/stops/{stop_id}") {
             val stopId = call.parameters["stop_id"]!!
             val stop = withContext(context = Dispatchers.IO) {
-                inject<StopDao>().value.get(stopId)
+                get<StopDao>().get(stopId)
             }
             if (stop != null)
                 call.respond(stop.asModel())
@@ -132,7 +127,7 @@ fun Application.module() {
             val routeId = call.parameters["route_id"]!!
             val useParent = call.queryParameters["parent"] !in listOf("false", "0")
             val stops = withContext(Dispatchers.IO) {
-                val routeDao by inject<RouteDao>()
+                val routeDao = get<RouteDao>()
                 if (useParent)
                     routeDao.stopsParent(routeId)
                 else
@@ -146,7 +141,7 @@ fun Application.module() {
                 ?.let { LocalDate.parse(it, LocalDate.Formats.ISO) }
                 ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
             val times = withContext(context = Dispatchers.IO) {
-                inject<StopTimeDao>().value
+                get<StopTimeDao>()
                     .getForStopDated(
                         stopId,
                         listOf(date.dayOfWeek).serialise(),

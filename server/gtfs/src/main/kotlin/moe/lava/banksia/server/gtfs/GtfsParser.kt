@@ -135,7 +135,7 @@ class GtfsParser(
             .forEach { fd ->
                 log.info("parsing stop times for ${fd.parent}...")
                 parseStopTimes(fd, trips) { seq ->
-                    seq.chunked(10000)
+                    seq.chunked(1000000)
                         .forEach { emit(GtfsData.StopTimeChunk(it)) }
                 }
             }

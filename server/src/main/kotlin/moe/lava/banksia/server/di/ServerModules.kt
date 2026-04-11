@@ -6,6 +6,7 @@ import moe.lava.banksia.server.GtfsDataFixer
 import moe.lava.banksia.server.GtfsImporter
 import moe.lava.banksia.server.gtfs.GtfsParser
 import moe.lava.banksia.server.gtfsrt.GtfsrtService
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -16,6 +17,6 @@ val ServerModules = module {
     singleOf(::GtfsParser)
     singleOf(::GtfsrtService)
 
-    singleOf(::GtfsDataFixer)
-    singleOf(::GtfsImporter)
+    factoryOf(::GtfsDataFixer)
+    factoryOf(::GtfsImporter)
 }
