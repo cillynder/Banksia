@@ -38,6 +38,8 @@ import java.io.File
 import java.util.zip.ZipFile
 import kotlin.time.ExperimentalTime
 
+private typealias StopWithSource = Pair<String, Stop>
+
 sealed class GtfsData {
     data class RouteChunk(val routes: List<Route>) : GtfsData()
     data class ServiceChunk(val services: List<Service>) : GtfsData()
@@ -104,7 +106,8 @@ class GtfsParser(
 
         files
             .filter { it.name == "stops.txt" }
-            .forEach { emit(GtfsData.StopChunk(parseStops(it))) }
+            .flatMap { parseStops(it) }
+            .let { emit(GtfsData.StopChunk(fixupDuplicateStops(it))) }
 
         files
             .filter { it.name == "shapes.txt" }
@@ -163,10 +166,10 @@ class GtfsParser(
                 Shape(id, points)
             }
 
-    private fun parseStops(fd: File) =
+    private fun parseStops(fd: File): List<StopWithSource> =
         fd.parseCsv<GtfsStop>()
             .map { with(it) {
-                Stop(
+                fd.parentFile.name to Stop(
                     id = stop_id,
                     name = stop_name,
                     pos = Point(stop_lat, stop_lon),
@@ -292,4 +295,46 @@ class GtfsParser(
             }
             block(csv.decodeToSequence(iter, csv.serializersModule.serializer()))
         }
+
+    // Type priority used to resolve duplicates, preferring the first one in the chain
+    private val typePriorityRanking = listOf(
+        RouteType.MetroTrain,
+        RouteType.RegionalTrain,
+        RouteType.MetroTram,
+        RouteType.MetroBus,
+        RouteType.RegionalBus,
+        RouteType.SkyBus,
+    ).map { it.value.toString() }
+
+    @Suppress("LoggingStringTemplateAsArgument") // ?
+    private fun fixupDuplicateStops(stops: List<StopWithSource>): List<Stop> {
+        return stops
+            .groupBy { (_, stops) -> stops.id }
+            .map { (id, stops) ->
+                // Just return it if no duplicate
+                if (stops.size == 1) return@map stops[0].second
+
+                // Just return the first one if all the stops' data match
+                if (stops.withIndex().all { (idx, stop) -> idx == 0 || stop.second == stops[idx - 1].second })
+                    return@map stops[0].second
+
+                // Find first stop ordered by the types
+                val res = typePriorityRanking
+                    .firstNotNullOfOrNull { type ->
+                        stops.find { it.first == type }
+                    }
+
+                val (_, stop) = if (res == null) {
+                    log.warn("Cannot resolve duplicate stop ${id}, using first one")
+                    stops.forEach { (type, stop) -> log.warn("  - ($type): $stop") }
+                    stops[0]
+                } else {
+                    log.debug("Resolving $id for type ${res.first}")
+                    stops.forEach { (type, stop) -> log.debug("${if (res.first == type) "*" else " "} - ($type): $stop") }
+                    res
+                }
+
+                stop
+            }
+    }
 }
