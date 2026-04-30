@@ -6,7 +6,7 @@ object Constants {
     const val opendataKey: String = ""
     const val serverUrl: String = "https://banksia.lava.moe/api/"
     // TODO
-    const val devMode: Boolean = false
+    var devMode: Boolean = false
     const val updateKey: String = ""
     const val protomapsKey: String = ""
 }

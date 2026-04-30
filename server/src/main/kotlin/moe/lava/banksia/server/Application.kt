@@ -33,11 +33,14 @@ import org.koin.ktor.plugin.Koin
 import kotlin.time.Clock
 
 fun main() {
+    if (System.getenv("BANKSIA_PRODUCTION") == "1") Constants.devMode = false
+
     embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
 fun Application.module() {
+    log.info("devMode: ${Constants.devMode}")
     install(ContentNegotiation) {
         json()
     }
