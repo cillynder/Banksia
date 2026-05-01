@@ -1,11 +1,22 @@
 package moe.lava.banksia.core.data.sources.route
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import moe.lava.banksia.core.model.Route
-import moe.lava.banksia.core.room.dao.RouteDao
-import moe.lava.banksia.core.room.entity.asEntity
+import moe.lava.banksia.core.sqld.RouteQueries
+import moe.lava.banksia.core.sqld.mappers.asDb
 
-internal class RouteLocalDataSource(private val dao: RouteDao) {
-    suspend fun get(id: String) = dao.get(id)
-    suspend fun getAll() = dao.getAll()
-    suspend fun save(vararg routes: Route) = dao.insertOrReplaceAll(*routes.map { it.asEntity() }.toTypedArray())
+internal class RouteLocalDataSource(private val queries: RouteQueries) {
+    suspend fun get(id: String) = withContext(Dispatchers.IO) { queries.get(id).executeAsOneOrNull() }
+    suspend fun getAll() = withContext(Dispatchers.IO) { queries.getAll().executeAsList() }
+    suspend fun save(vararg routes: Route) {
+        withContext(Dispatchers.IO) {
+            queries.transaction {
+                routes.forEach {
+                    queries.insert(it.asDb())
+                }
+            }
+        }
+    }
 }

@@ -1,0 +1,11 @@
+CREATE TABLE Service (
+    id TEXT PRIMARY KEY NOT NULL,
+    days INTEGER NOT NULL,
+    start INTEGER NOT NULL,
+    end INTEGER NOT NULL
+);
+
+CREATE INDEX idx_Service_days ON Service (days);
+
+insert:
+INSERT INTO Service VALUES ?;

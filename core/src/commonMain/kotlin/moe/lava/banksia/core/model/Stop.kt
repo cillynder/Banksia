@@ -10,6 +10,6 @@ data class Stop(
     val pos: Point,
     val parent: String?,
     val hasWheelChairBoarding: Boolean,
-    val level: String,
-    val platformCode: String,
+    val level: String?,
+    val platformCode: String?,
 )

@@ -20,10 +20,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import moe.lava.banksia.core.Constants
 import moe.lava.banksia.core.model.atDate
-import moe.lava.banksia.core.room.dao.RouteDao
-import moe.lava.banksia.core.room.dao.StopDao
-import moe.lava.banksia.core.room.dao.StopTimeDao
-import moe.lava.banksia.core.room.dao.VersionMetadataDao
+import moe.lava.banksia.core.sqld.RouteQueries
+import moe.lava.banksia.core.sqld.StopQueries
+import moe.lava.banksia.core.sqld.StopTimeQueries
+import moe.lava.banksia.core.sqld.mappers.asModel
 import moe.lava.banksia.core.util.serialise
 import moe.lava.banksia.server.di.ServerModules
 import moe.lava.banksia.server.gtfsrt.GtfsrtService
@@ -88,25 +88,9 @@ fun Application.module() {
             }
         }
 
-        get("/metadata/{type?}") {
-            val dao = get<VersionMetadataDao>()
-            val type = call.parameters["type"]
-            if (type == null) {
-                call.respond(dao.getAll().map { it.asModel() })
-                return@get
-            }
-
-            val data = dao.get(type)?.asModel()
-            if (data == null) {
-                call.respond(HttpStatusCode.NotFound)
-            } else {
-                call.respond(data)
-            }
-        }
-
         get("/routes") {
             val routes = withContext(context = Dispatchers.IO) {
-                get<RouteDao>().getAll()
+                get<RouteQueries>().getAll().executeAsList()
             }
             val res = routes.map { it.asModel() }
             call.respond(res)
@@ -114,16 +98,17 @@ fun Application.module() {
         get("/routes/{route_id}") {
             val routeId = call.parameters["route_id"]!!
             val route = withContext(context = Dispatchers.IO) {
-                get<RouteDao>().get(routeId)
+                get<RouteQueries>().get(routeId).executeAsOneOrNull()
             }
-            if (route != null)
+            if (route != null) {
                 call.respond(route.asModel())
-            else
+            } else {
                 call.respond(HttpStatusCode.NotFound)
+            }
         }
         get("/stops") {
             val routes = withContext(context = Dispatchers.IO) {
-                get<StopDao>().getAll()
+                get<StopQueries>().getAll().executeAsList()
             }
             val res = routes.map { it.asModel() }
             call.respond(res)
@@ -131,22 +116,24 @@ fun Application.module() {
         get("/stops/{stop_id}") {
             val stopId = call.parameters["stop_id"]!!
             val stop = withContext(context = Dispatchers.IO) {
-                get<StopDao>().get(stopId)
+                get<StopQueries>().get(stopId).executeAsOneOrNull()
             }
-            if (stop != null)
+            if (stop != null) {
                 call.respond(stop.asModel())
-            else
+            } else {
                 call.respond(HttpStatusCode.NotFound)
+            }
         }
         get("/route_stops/{route_id}") {
             val routeId = call.parameters["route_id"]!!
             val useParent = call.queryParameters["parent"] !in listOf("false", "0")
             val stops = withContext(Dispatchers.IO) {
-                val routeDao = get<RouteDao>()
-                if (useParent)
-                    routeDao.stopsParent(routeId)
-                else
-                    routeDao.stops(routeId)
+                val queries = get<StopQueries>()
+                if (useParent) {
+                    queries.getParentsByRoute(routeId).executeAsList()
+                } else {
+                    queries.getByRoute(routeId).executeAsList()
+                }
             }
             call.respond(stops.map { it.asModel() })
         }
@@ -156,12 +143,13 @@ fun Application.module() {
                 ?.let { LocalDate.parse(it, LocalDate.Formats.ISO) }
                 ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
             val times = withContext(context = Dispatchers.IO) {
-                get<StopTimeDao>()
+                get<StopTimeQueries>()
                     .getForStopDated(
+                        listOf(date.dayOfWeek).serialise().toLong(),
+                        date.toEpochDays(),
                         stopId,
-                        listOf(date.dayOfWeek).serialise(),
-                        date.toEpochDays().toInt(),
                     )
+                    .executeAsList()
                     .map { it.asModel().atDate(date) }
                     .sortedBy { it.departureTime }
             }

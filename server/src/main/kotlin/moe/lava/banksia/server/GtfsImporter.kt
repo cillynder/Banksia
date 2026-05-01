@@ -8,12 +8,12 @@ import moe.lava.banksia.core.model.Shape
 import moe.lava.banksia.core.model.Stop
 import moe.lava.banksia.core.model.StopTime
 import moe.lava.banksia.core.model.Trip
-import moe.lava.banksia.core.room.Database
-import moe.lava.banksia.core.room.DatabaseManager
-import moe.lava.banksia.core.room.entity.asEntity
+import moe.lava.banksia.core.sqld.DatabaseManager
+import moe.lava.banksia.core.sqld.mappers.asDb
 import moe.lava.banksia.server.gtfs.GtfsData
 import moe.lava.banksia.server.gtfs.GtfsParser
 import kotlin.time.Clock
+import moe.lava.banksia.core.sqld.BanksiaDatabase as Database
 
 class GtfsImporter(
     private val parser: GtfsParser,
@@ -21,7 +21,7 @@ class GtfsImporter(
     private val log: Logger,
 ) {
     suspend fun import(url: String, date: Long = Clock.System.now().epochSeconds) {
-        val database = dbm.makeAlt()
+        val (database, close) = dbm.makeAlt()
 
         parser.update(url).collect { chunk ->
             when (chunk) {
@@ -35,48 +35,51 @@ class GtfsImporter(
             }
         }
 
-        database.updateMetadata(date)
-        database.close()
+        close()
         dbm.swap()
     }
 
-    private suspend fun Database.updateMetadata(date: Long) {
-        val dao = versionMetadataDao
-        log.info("updating metadata...")
-        dao.update(date, listOf("routes", "stops", "shapes", "trips", "stop_times"))
-        log.info("done")
-    }
-
-    private suspend fun Database.addRoutes(routes: List<Route>) {
-        val dao = routeDao
+    private fun Database.addRoutes(routes: List<Route>) {
         log.info("inserting routes...")
-        dao.insertOrReplaceAll(*routes.map { it.asEntity() }.toTypedArray())
+        routeQueries.transaction {
+            routes.forEach {
+                routeQueries.insert(it.asDb())
+            }
+        }
         log.info("done")
     }
 
-    private suspend fun Database.addServices(services: List<Service>) {
-        val dao = serviceDao
+    private fun Database.addServices(services: List<Service>) {
         log.info("inserting services...")
-        dao.insertOrReplaceAll(*services.map { it.asEntity() }.toTypedArray())
+        serviceQueries.transaction {
+            services.forEach {
+                serviceQueries.insert(it.asDb())
+            }
+        }
         log.info("done")
     }
 
-    private suspend fun Database.addServiceExceptions(exceptions: List<ServiceException>) {
-        val dao = serviceExceptionDao
+    private fun Database.addServiceExceptions(exceptions: List<ServiceException>) {
         log.info("inserting exceptions...")
-        dao.insertOrReplaceAll(*exceptions.map { it.asEntity() }.toTypedArray())
+        serviceExceptionQueries.transaction {
+            exceptions.forEach {
+                serviceExceptionQueries.insert(it.asDb())
+            }
+        }
         log.info("done")
     }
 
-    private suspend fun Database.addShapes(shapes: List<Shape>) {
-        val dao = shapeDao
+    private fun Database.addShapes(shapes: List<Shape>) {
         log.info("inserting shapes...")
-        dao.insertOrReplaceAll(*shapes.map { it.asEntity() }.toTypedArray())
+        shapeQueries.transaction {
+            shapes.forEach {
+                shapeQueries.insert(it.asDb())
+            }
+        }
         log.info("done")
     }
 
-    private suspend fun Database.addStops(stops: List<Stop>) {
-        val dao = stopDao
+    private fun Database.addStops(stops: List<Stop>) {
         log.info("inserting stops...")
         stops
             .groupBy { it.id }
@@ -89,21 +92,32 @@ class GtfsImporter(
                     }
                 }
             }
-        dao.insertOrReplaceAll(*stops.map { it.asEntity() }.toTypedArray())
+
+        stopQueries.transaction {
+            stops.forEach {
+                stopQueries.insert(it.asDb())
+            }
+        }
         log.info("done")
     }
 
-    private suspend fun Database.addStopTimes(stopTimes: List<StopTime>) {
-        val dao = stopTimeDao
+    private fun Database.addStopTimes(stopTimes: List<StopTime>) {
         log.info("inserting ${stopTimes.size} stoptimes...")
-        dao.insertOrReplaceAll(*stopTimes.map { it.asEntity() }.toTypedArray())
+        stopTimeQueries.transaction {
+            stopTimes.forEach {
+                stopTimeQueries.insert(it.asDb())
+            }
+        }
         log.info("done")
     }
 
-    private suspend fun Database.addTrips(trips: List<Trip>) {
-        val dao = tripDao
+    private fun Database.addTrips(trips: List<Trip>) {
         log.info("inserting ${trips.size} trips...")
-        dao.insertOrReplaceAll(*trips.map { it.asEntity() }.toTypedArray())
+        tripQueries.transaction {
+            trips.forEach {
+                tripQueries.insert(it.asDb())
+            }
+        }
         log.info("done")
     }
 }

@@ -1,0 +1,54 @@
+CREATE TABLE Stop (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    lat REAL NOT NULL,
+    lng REAL NOT NULL,
+    parent TEXT REFERENCES Stop(id),
+    hasWheelChairBoarding INTEGER NOT NULL,
+    level TEXT,
+    platformCode TEXT
+);
+
+CREATE INDEX idx_Stop_parent ON Stop (parent);
+
+getAll:
+SELECT * FROM Stop;
+
+getAllParentless:
+SELECT * FROM Stop WHERE platformCode IS NULL AND parent IS NULL;
+
+get:
+SELECT * FROM Stop WHERE id == ?;
+
+getMany:
+SELECT * FROM Stop WHERE id IN ?;
+
+insert:
+INSERT INTO Stop VALUES ?;
+
+updateParents:
+UPDATE Stop SET parent = ? WHERE id IN ?;
+
+getByRoute:
+SELECT Stop.* FROM Stop
+INNER JOIN StopTime ON StopTime.stopId == Stop.id
+INNER JOIN Trip ON Trip.id == StopTime.tripId
+WHERE Trip.routeId == :id
+GROUP BY Stop.id;
+
+-- I vibecoded this, sorry
+getParentsByRoute:
+WITH RECURSIVE Tree AS (
+    SELECT Stop.* FROM Stop
+    INNER JOIN StopTime ON StopTime.stopId == Stop.id
+    INNER JOIN Trip ON Trip.id == StopTime.tripId
+    WHERE Trip.routeId == :id
+    GROUP BY Stop.id
+
+    UNION ALL
+
+    SELECT s.*
+    FROM Stop s
+    INNER JOIN Tree t ON s.id = t.parent
+)
+SELECT DISTINCT * FROM Tree WHERE parent IS NULL;

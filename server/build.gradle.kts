@@ -20,7 +20,7 @@ kotlin {
 
 dependencies {
     implementation(projects.core)
-    implementation(projects.core.room)
+    implementation(projects.core.sqld)
     implementation(projects.server.gtfs)
     implementation(projects.server.gtfsRt)
 
@@ -36,8 +36,6 @@ dependencies {
     implementation(libs.ktor.server.contentnegotiation)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
-    implementation(libs.room.runtime)
-    implementation(libs.sqlite.bundled)
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
 }

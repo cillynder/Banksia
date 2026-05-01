@@ -1,16 +1,16 @@
 package moe.lava.banksia.server
 
-import moe.lava.banksia.core.room.Database
-import moe.lava.banksia.core.room.entity.StopEntity
+import moe.lava.banksia.core.sqld.BanksiaDatabase
 import moe.lava.banksia.core.util.log
 import java.security.MessageDigest
+import moe.lava.banksia.core.sqld.Stop as DbStop
 
 class GtfsDataFixer(
-    private val database: Database,
+    private val database: BanksiaDatabase,
 ) {
-    suspend fun addParentsToStops() {
-        val dao = database.stopDao
-        val stops = dao.getAllParentless()
+    fun addParentsToStops() {
+        val queries = database.stopQueries
+        val stops = queries.getAllParentless().executeAsList()
         stops
             .groupBy { it.name.split("/")[0] }
             .filter { (_, stops) -> stops.size > 1 }
@@ -19,19 +19,21 @@ class GtfsDataFixer(
                 val avgLng = stops.map { it.lng }.average()
                 val hash = name.sha256().substring(0, 7)
                 val parentId = "bsia:df1:$hash"
-                val parent = StopEntity(
+                val parent = DbStop(
                     id = parentId,
                     name = name,
                     lat = avgLat,
                     lng = avgLng,
                     parent = null,
-                    hasWheelChairBoarding = stops.all { it.hasWheelChairBoarding },
+                    hasWheelChairBoarding = if (stops.all { it.hasWheelChairBoarding == 1L }) 1L else 0L,
                     level = "",
                     platformCode = "",
                 )
                 log("datafixer", "inserting ${parentId} for ${stops.size} children")
-                dao.insertAll(parent)
-                dao.updateParents(stops.map { it.id }, parentId)
+                queries.transaction {
+                    queries.insert(parent)
+                    queries.updateParents(parentId, stops.map { it.id })
+                }
             }
     }
 }

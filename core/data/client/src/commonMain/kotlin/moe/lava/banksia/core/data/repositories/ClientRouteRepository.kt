@@ -4,6 +4,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import moe.lava.banksia.core.data.sources.route.RouteLocalDataSource
 import moe.lava.banksia.core.data.sources.route.RouteRemoteDataSource
+import moe.lava.banksia.core.sqld.mappers.asModel
 
 internal class ClientRouteRepository internal constructor(
     private val local: RouteLocalDataSource,

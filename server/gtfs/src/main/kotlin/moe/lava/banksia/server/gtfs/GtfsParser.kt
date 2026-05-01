@@ -175,8 +175,8 @@ class GtfsParser(
                     pos = Point(stop_lat, stop_lon),
                     parent = parent_station.ifEmpty { null },
                     hasWheelChairBoarding = wheelchair_boarding == "1",
-                    level = level_id,
-                    platformCode = platform_code,
+                    level = level_id.ifEmpty { null },
+                    platformCode = platform_code.ifEmpty { null },
                 )
             } }
 
@@ -210,7 +210,7 @@ class GtfsParser(
                     if (sunday == 1) add(DayOfWeek.SUNDAY)
                 }
                 Service(
-                    id = service_id,
+                    id = "${fd.parentFile.name}_${service_id}",
                     days = days,
                     start = LocalDate.parse(start_date, LocalDate.Formats.ISO_BASIC),
                     end = LocalDate.parse(end_date, LocalDate.Formats.ISO_BASIC),
@@ -221,7 +221,7 @@ class GtfsParser(
         fd.parseCsv<GtfsServiceException>()
             .map { with(it) {
                 ServiceException(
-                    serviceId = service_id,
+                    serviceId = "${fd.parentFile.name}_${service_id}",
                     date = LocalDate.parse(date, LocalDate.Formats.ISO_BASIC),
                     type = exception_type,
                 )
@@ -233,12 +233,12 @@ class GtfsParser(
                 Trip(
                     id = trip_id,
                     routeId = route_id,
-                    service = services[service_id]!!,
-                    shapeId = shape_id.ifEmpty { null },
+                    service = services["${fd.parentFile.name}_${service_id}"]!!,
+                    shapeId = shape_id,
                     tripHeadsign = trip_headsign,
                     directionId = direction_id,
-                    blockId = block_id,
-                    wheelchairAccessible = wheelchair_accessible,
+                    blockId = block_id.ifEmpty { null },
+                    wheelchairAccessible = wheelchair_accessible == "1",
                 )
             } }
 

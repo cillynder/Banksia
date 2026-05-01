@@ -1,0 +1,15 @@
+CREATE TABLE Route (
+    id TEXT PRIMARY KEY NOT NULL,
+    type INTEGER NOT NULL,
+    number TEXT,
+    name TEXT NOT NULL
+);
+
+getAll:
+SELECT * FROM Route;
+
+get:
+SELECT * FROM Route WHERE id == ?;
+
+insert:
+INSERT INTO Route VALUES ?;

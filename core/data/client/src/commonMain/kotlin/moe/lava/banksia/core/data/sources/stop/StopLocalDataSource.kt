@@ -1,12 +1,22 @@
 package moe.lava.banksia.core.data.sources.stop
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import moe.lava.banksia.core.model.Stop
-import moe.lava.banksia.core.room.dao.RouteDao
-import moe.lava.banksia.core.room.dao.StopDao
-import moe.lava.banksia.core.room.entity.asEntity
+import moe.lava.banksia.core.sqld.StopQueries
+import moe.lava.banksia.core.sqld.mappers.asDb
 
-internal class StopLocalDataSource(private val dao: StopDao, private val routeDao: RouteDao) {
-    suspend fun get(id: String) = dao.get(id)
-    suspend fun getByRoute(id: String) = routeDao.stops(id)
-    suspend fun save(vararg stops: Stop) = dao.insertOrReplaceAll(*stops.map { it.asEntity() }.toTypedArray())
+internal class StopLocalDataSource(private val queries: StopQueries) {
+    suspend fun get(id: String) = withContext(Dispatchers.IO) { queries.get(id).executeAsOneOrNull() }
+    suspend fun getByRoute(id: String) = withContext(Dispatchers.IO) { queries.getByRoute(id).executeAsList() }
+    suspend fun save(vararg stops: Stop) {
+        withContext(Dispatchers.IO) {
+            queries.transaction {
+                stops.forEach {
+                    queries.insert(it.asDb())
+                }
+            }
+        }
+    }
 }

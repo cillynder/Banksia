@@ -20,7 +20,7 @@ import moe.lava.banksia.core.data.sources.stop.StopLocalDataSource
 import moe.lava.banksia.core.data.sources.stop.StopRemoteDataSource
 import moe.lava.banksia.core.data.sources.stoptime.StopTimeLocalDataSource
 import moe.lava.banksia.core.data.sources.stoptime.StopTimeRemoteDataSource
-import moe.lava.banksia.core.room.roomDiModule
+import moe.lava.banksia.core.sqld.sqldDiModule
 import moe.lava.banksia.core.util.log
 import moe.lava.banksia.data.ptv.PtvService
 import org.koin.core.module.dsl.singleOf
@@ -28,7 +28,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val clientDataDiModule = module {
-    includes(roomDiModule)
+    includes(sqldDiModule)
 
     // HTTP Clients
     singleOf(::PtvService)

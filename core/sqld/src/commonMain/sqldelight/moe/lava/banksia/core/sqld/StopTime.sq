@@ -1,0 +1,23 @@
+CREATE TABLE StopTime (
+    tripId TEXT NOT NULL REFERENCES Trip (id),
+    stopId TEXT NOT NULL REFERENCES Stop (id),
+    arrivalTime INTEGER NOT NULL,
+    departureTime INTEGER NOT NULL,
+    pickupType INTEGER NOT NULL,
+    dropOffType INTEGER NOT NULL,
+    PRIMARY KEY (tripId, stopId)
+) WITHOUT ROWID;
+
+CREATE INDEX idx_StopTime_stopId ON StopTime (stopId);
+
+insert:
+INSERT OR REPLACE INTO StopTime VALUES ?;
+
+getForStopDated:
+SELECT DISTINCT StopTime.* FROM StopTime
+INNER JOIN Service ON Service.days & :days = :days AND :date BETWEEN Service.start AND Service.`end`
+INNER JOIN Trip ON Trip.serviceId == Service.id
+LEFT JOIN ServiceException ON ServiceException.serviceId == Service.id AND ServiceException.date == :date
+WHERE StopTime.tripId == Trip.id
+    AND StopTime.stopId IN (SELECT Stop.id FROM Stop WHERE Stop.parent == :stopId OR Stop.id == :stopId)
+    AND ServiceException.type IS NULL;

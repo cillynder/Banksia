@@ -45,7 +45,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.protobuf)
 
             implementation(projects.core)
-            implementation(projects.core.room)
+            implementation(projects.core.sqld)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

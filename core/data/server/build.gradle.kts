@@ -17,5 +17,4 @@ dependencies {
 
     api(projects.core.data)
     implementation(projects.core)
-    implementation(projects.core.room)
 }

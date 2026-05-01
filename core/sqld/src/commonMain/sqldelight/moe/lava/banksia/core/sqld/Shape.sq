@@ -1,0 +1,7 @@
+CREATE TABLE Shape (
+    id TEXT PRIMARY KEY NOT NULL,
+    path BLOB NOT NULL
+);
+
+insert:
+INSERT INTO Shape VALUES ?;

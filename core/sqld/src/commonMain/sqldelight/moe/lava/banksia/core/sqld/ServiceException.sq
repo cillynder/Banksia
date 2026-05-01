@@ -1,0 +1,9 @@
+CREATE TABLE ServiceException (
+    serviceId TEXT NOT NULL,
+    type INTEGER NOT NULL,
+    date INTEGER NOT NULL,
+    PRIMARY KEY (serviceId, type)
+);
+
+insert:
+INSERT INTO ServiceException VALUES ?;
