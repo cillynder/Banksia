@@ -4,23 +4,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
-import moe.lava.banksia.core.model.StopTimeDated
+import moe.lava.banksia.core.model.StopTime
 import moe.lava.banksia.core.model.atDate
 import moe.lava.banksia.core.sqld.StopTimeQueries
 import moe.lava.banksia.core.sqld.mappers.asModel
 import moe.lava.banksia.core.util.serialise
-import kotlin.time.Clock
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
-internal class StopTimeLocalDataSource(
-    private val queries: StopTimeQueries,
-) {
-    suspend fun getAtStop(
-        stopId: String,
-        date: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    ): List<StopTimeDated> {
-        return withContext(Dispatchers.IO) {
+internal class StopTimeLocalDataSource : KoinComponent {
+    private val queries get() = get<StopTimeQueries>()
+
+    suspend fun getAtStop(stopId: String, date: LocalDate): List<StopTime.Dated> {
+        return withContext(context = Dispatchers.IO) {
             queries
                 .getForStopDated(
                     listOf(date.dayOfWeek).serialise().toLong(),
@@ -29,7 +25,7 @@ internal class StopTimeLocalDataSource(
                 )
                 .executeAsList()
                 .map { it.asModel().atDate(date) }
-                .sortedBy { it.departureTime }
+                .sortedBy { it.time.departure }
         }
     }
 }

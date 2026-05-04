@@ -151,7 +151,7 @@ fun Application.module() {
                     )
                     .executeAsList()
                     .map { it.asModel().atDate(date) }
-                    .sortedBy { it.departureTime }
+                    .sortedBy { it.time.departure }
             }
             call.respond(times)
         }

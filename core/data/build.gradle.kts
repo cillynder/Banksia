@@ -27,6 +27,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core)
+            api(projects.core.data.stoptime)
         }
     }
 }

@@ -47,6 +47,7 @@ sqldelight {
     databases {
         register("BanksiaDatabase") {
             packageName.set("moe.lava.banksia.core.sqld")
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/schema"))
         }
     }
 }

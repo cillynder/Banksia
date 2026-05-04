@@ -10,16 +10,12 @@ import kotlinx.serialization.json.Json
 import moe.lava.banksia.core.Constants
 import moe.lava.banksia.core.data.repositories.ClientRouteRepository
 import moe.lava.banksia.core.data.repositories.ClientStopRepository
-import moe.lava.banksia.core.data.repositories.ClientStopTimeRepository
 import moe.lava.banksia.core.data.repositories.RouteRepository
 import moe.lava.banksia.core.data.repositories.StopRepository
-import moe.lava.banksia.core.data.repositories.StopTimeRepository
 import moe.lava.banksia.core.data.sources.route.RouteLocalDataSource
 import moe.lava.banksia.core.data.sources.route.RouteRemoteDataSource
 import moe.lava.banksia.core.data.sources.stop.StopLocalDataSource
 import moe.lava.banksia.core.data.sources.stop.StopRemoteDataSource
-import moe.lava.banksia.core.data.sources.stoptime.StopTimeLocalDataSource
-import moe.lava.banksia.core.data.sources.stoptime.StopTimeRemoteDataSource
 import moe.lava.banksia.core.sqld.sqldDiModule
 import moe.lava.banksia.core.util.log
 import moe.lava.banksia.data.ptv.PtvService
@@ -29,6 +25,7 @@ import org.koin.dsl.module
 
 val clientDataDiModule = module {
     includes(sqldDiModule)
+    includes(stopTimeDataDiModule)
 
     // HTTP Clients
     singleOf(::PtvService)
@@ -56,11 +53,8 @@ val clientDataDiModule = module {
     singleOf(::RouteRemoteDataSource)
     singleOf(::StopLocalDataSource)
     singleOf(::StopRemoteDataSource)
-    singleOf(::StopTimeLocalDataSource)
-    singleOf(::StopTimeRemoteDataSource)
 
     // Repositories
     singleOf(::ClientRouteRepository) bind RouteRepository::class
     singleOf(::ClientStopRepository) bind StopRepository::class
-    singleOf(::ClientStopTimeRepository) bind StopTimeRepository::class
 }

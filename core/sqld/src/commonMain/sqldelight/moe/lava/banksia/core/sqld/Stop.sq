@@ -15,7 +15,7 @@ getAll:
 SELECT * FROM Stop;
 
 getAllParentless:
-SELECT * FROM Stop WHERE platformCode IS NULL AND parent IS NULL;
+SELECT * FROM Stop WHERE platformCode IS NOT NULL AND parent IS NULL;
 
 get:
 SELECT * FROM Stop WHERE id == ?;
@@ -32,8 +32,8 @@ UPDATE Stop SET parent = ? WHERE id IN ?;
 getByRoute:
 SELECT Stop.* FROM Stop
 INNER JOIN StopTime ON StopTime.stopId == Stop.id
-INNER JOIN Trip ON Trip.id == StopTime.tripId
-WHERE Trip.routeId == :id
+INNER JOIN StoppingPattern ON StoppingPattern.id == StopTime.patternId
+WHERE StoppingPattern.routeId == :id
 GROUP BY Stop.id;
 
 -- I vibecoded this, sorry
@@ -41,8 +41,8 @@ getParentsByRoute:
 WITH RECURSIVE Tree AS (
     SELECT Stop.* FROM Stop
     INNER JOIN StopTime ON StopTime.stopId == Stop.id
-    INNER JOIN Trip ON Trip.id == StopTime.tripId
-    WHERE Trip.routeId == :id
+    INNER JOIN StoppingPattern ON StoppingPattern.id == StopTime.patternId
+    WHERE StoppingPattern.routeId == :id
     GROUP BY Stop.id
 
     UNION ALL

@@ -1,0 +1,10 @@
+CREATE TABLE StoppingPattern (
+    id INTEGER PRIMARY KEY NOT NULL,
+    routeId TEXT NOT NULL REFERENCES Route (id),
+    shapeId TEXT NOT NULL REFERENCES Shape (id),
+    headsign TEXT NOT NULL,
+    wheelchairAccessible INTEGER NOT NULL
+);
+
+insert:
+INSERT OR REPLACE INTO StoppingPattern VALUES ?;

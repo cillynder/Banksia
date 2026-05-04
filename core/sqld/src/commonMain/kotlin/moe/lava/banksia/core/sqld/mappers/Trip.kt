@@ -1,32 +1,27 @@
 package moe.lava.banksia.core.sqld.mappers
 
 import moe.lava.banksia.core.model.Service
+import moe.lava.banksia.core.model.StoppingPattern
 import moe.lava.banksia.core.model.Trip
 import moe.lava.banksia.core.sqld.Trip as DbTrip
 
-fun DbTrip.asModel(service: Service): Trip {
+fun DbTrip.asModel(pattern: StoppingPattern.Undated, service: Service): Trip.Undated {
     if (serviceId != service.id) {
         throw IllegalArgumentException("trip and service id mismatch (${serviceId} != ${service.id})")
     }
     return Trip(
-        id = id,
-        routeId = routeId,
+        id = gtfsId,
+        pattern = pattern,
         service = service,
-        shapeId = shapeId,
-        tripHeadsign = tripHeadsign,
-        directionId = directionId,
-        blockId = blockId,
-        wheelchairAccessible = wheelchairAccessible == 1L
+        directionId = directionId.toInt(),
+        blockId = blockId.toString(),
     )
 }
 
-fun Trip.asDb() = DbTrip(
-    id = id,
-    routeId = routeId,
+fun Trip.Undated.asDb() = DbTrip(
+    gtfsId = id,
+    patternId = pattern.id,
     serviceId = service.id,
-    shapeId = shapeId,
-    tripHeadsign = tripHeadsign,
-    directionId = directionId,
-    blockId = blockId,
-    wheelchairAccessible = if (wheelchairAccessible) 1L else 0L
+    directionId = directionId.toLong(),
+    blockId = blockId?.toLong(),
 )

@@ -231,30 +231,36 @@ class MapScreenViewModel(
             )
         }
 
-        val departures = stopTimeRepository.getForStop(id)
-            .filter { !it.headsign.isNullOrBlank() }
-            .groupBy { it.headsign!! }
-            .map { (headsign, stopTimes) ->
-                val now = Clock.System.now()
-                val times = stopTimes
-                    .map { it.arrivalTime.toInstant(TimeZone.currentSystemDefault()) }
-                    .filter { it >= (now - 1.minutes) }
-                    .joinToString(" | ") {
-                        val diff = (it - now).inWholeMinutes.coerceAtLeast(0)
-                        if (diff >= 65) {
-                            "${((diff + 30.0) / 60.0).toInt()}hr"
-                        } else {
-                            "${diff}mn"
-                        }
+        stopTimeRepository.getForStop(id)
+            .onEach { stoptimes ->
+                val departures = stoptimes
+//                    .filter { !it.headsign.isNullOrBlank() }
+//                    .groupBy { it.headsign!! }
+                    .groupBy { it.stopId } // TODO: Placeholder
+                    .map { (headsign, stopTimes) ->
+                        val now = Clock.System.now()
+                        val times = stopTimes
+                            .map { it.time.arrival.toInstant(TimeZone.currentSystemDefault()) }
+                            .filter { it >= (now - 1.minutes) }
+                            .joinToString(" | ") {
+                                val diff = (it - now).inWholeMinutes.coerceAtLeast(0)
+                                if (diff >= 65) {
+                                    "${((diff + 30.0) / 60.0).toInt()}hr"
+                                } else {
+                                    "${diff}mn"
+                                }
+                            }
+                        StopInfoPanelState.Departure(headsign, times)
                     }
-                StopInfoPanelState.Departure(headsign, times)
+
+                iInfoState.update {
+                    if (it !is StopInfoPanelState)
+                        it
+                    else
+                        it.copy(departures = departures)
+                }
             }
-        iInfoState.update {
-            if (it !is StopInfoPanelState)
-                it
-            else
-                it.copy(departures = departures)
-        }
+            .launchIn(viewModelScope)
     }
 
     /*private suspend fun buildPolylines(route: PtvRoute) {

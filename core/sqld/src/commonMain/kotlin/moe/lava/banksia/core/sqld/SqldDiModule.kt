@@ -11,6 +11,7 @@ val sqldDiModule = module {
     factory { get<BanksiaDatabase>().serviceExceptionQueries }
     factory { get<BanksiaDatabase>().shapeQueries }
     factory { get<BanksiaDatabase>().stopQueries }
+    factory { get<BanksiaDatabase>().stoppingPatternQueries }
     factory { get<BanksiaDatabase>().stopTimeQueries }
     factory { get<BanksiaDatabase>().tripQueries }
 }

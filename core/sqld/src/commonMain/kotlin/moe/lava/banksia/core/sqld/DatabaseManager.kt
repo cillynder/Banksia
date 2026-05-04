@@ -1,7 +1,7 @@
 package moe.lava.banksia.core.sqld
 
-import org.koin.core.component.KoinComponent
+internal const val DBNAME = "timetable"
 
-expect class DatabaseManager() : KoinComponent {
+expect class DatabaseManager() {
     val database: BanksiaDatabase
 }

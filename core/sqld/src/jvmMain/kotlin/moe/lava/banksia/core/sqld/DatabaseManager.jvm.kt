@@ -11,9 +11,7 @@ import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
 
-private const val DBNAME = "timetable"
-
-actual class DatabaseManager actual constructor() : KoinComponent {
+actual class DatabaseManager : KoinComponent {
     private var driver = connect()
     actual val database get() = BanksiaDatabase(driver)
 

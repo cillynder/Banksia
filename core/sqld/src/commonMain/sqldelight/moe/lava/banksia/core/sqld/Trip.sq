@@ -1,14 +1,12 @@
 CREATE TABLE Trip (
-    id TEXT PRIMARY KEY NOT NULL,
-    routeId TEXT NOT NULL REFERENCES Route (id),
+    gtfsId TEXT PRIMARY KEY NOT NULL,
+    patternId INTEGER NOT NULL REFERENCES StoppingPattern (id),
     serviceId TEXT NOT NULL REFERENCES Service (id),
-    shapeId TEXT NOT NULL REFERENCES Shape (id),
-    tripHeadsign TEXT NOT NULL,
-    directionId TEXT NOT NULL,
-    blockId TEXT,
-    wheelchairAccessible INTEGER NOT NULL
+    blockId INTEGER,
+    directionId INTEGER NOT NULL
 );
 
+CREATE INDEX idx_Trip_patternId ON Trip (patternId);
 CREATE INDEX idx_Trip_serviceId ON Trip (serviceId);
 
 insert:

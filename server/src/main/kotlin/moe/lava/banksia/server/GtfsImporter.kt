@@ -6,7 +6,6 @@ import moe.lava.banksia.core.model.Service
 import moe.lava.banksia.core.model.ServiceException
 import moe.lava.banksia.core.model.Shape
 import moe.lava.banksia.core.model.Stop
-import moe.lava.banksia.core.model.StopTime
 import moe.lava.banksia.core.model.Trip
 import moe.lava.banksia.core.sqld.DatabaseManager
 import moe.lava.banksia.core.sqld.mappers.asDb
@@ -30,7 +29,6 @@ class GtfsImporter(
                 is GtfsData.ServiceExceptionChunk -> database.addServiceExceptions(chunk.exceptions)
                 is GtfsData.ShapeChunk -> database.addShapes(chunk.shapes)
                 is GtfsData.StopChunk -> database.addStops(chunk.stops)
-                is GtfsData.StopTimeChunk -> database.addStopTimes(chunk.stopTimes)
                 is GtfsData.TripChunk -> database.addTrips(chunk.trips)
             }
         }
@@ -101,21 +99,15 @@ class GtfsImporter(
         log.info("done")
     }
 
-    private fun Database.addStopTimes(stopTimes: List<StopTime>) {
-        log.info("inserting ${stopTimes.size} stoptimes...")
-        stopTimeQueries.transaction {
-            stopTimes.forEach {
-                stopTimeQueries.insert(it.asDb())
-            }
-        }
-        log.info("done")
-    }
-
-    private fun Database.addTrips(trips: List<Trip>) {
+    private fun Database.addTrips(trips: List<Trip.Undated>) {
         log.info("inserting ${trips.size} trips...")
-        tripQueries.transaction {
-            trips.forEach {
-                tripQueries.insert(it.asDb())
+        transaction {
+            trips.forEach { trip ->
+                stoppingPatternQueries.insert(trip.pattern.asDb())
+                trip.pattern.stoptimes.forEach { stoptime ->
+                    stopTimeQueries.insert(stoptime.asDb())
+                }
+                tripQueries.insert(trip.asDb())
             }
         }
         log.info("done")

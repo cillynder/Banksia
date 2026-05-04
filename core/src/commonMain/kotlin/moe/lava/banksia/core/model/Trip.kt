@@ -3,13 +3,13 @@ package moe.lava.banksia.core.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Trip(
+data class Trip<T: TimeType>(
     val id: String,
-    val routeId: String,
+    val pattern: StoppingPattern<T>,
     val service: Service,
-    val shapeId: String,
-    val tripHeadsign: String,
-    val directionId: String,
+    val directionId: Int,
     val blockId: String?,
-    val wheelchairAccessible: Boolean,
-)
+) {
+    typealias Dated = Trip<TimeType.Dated>
+    typealias Undated = Trip<TimeType.Undated>
+}

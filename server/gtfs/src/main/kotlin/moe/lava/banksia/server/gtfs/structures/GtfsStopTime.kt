@@ -10,7 +10,7 @@ internal data class GtfsStopTime(
     val arrival_time: String,
     val departure_time: String,
     val stop_id: String,
-    val stop_sequence: Int,
+    val stop_sequence: Long,
     val stop_headsign: String,
     val pickup_type: Int,
     val drop_off_type: Int,

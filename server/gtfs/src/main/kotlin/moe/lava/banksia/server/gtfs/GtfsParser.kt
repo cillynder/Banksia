@@ -18,6 +18,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.serializer
 import moe.lava.banksia.core.Constants
+import moe.lava.banksia.core.model.FutureTime.Companion.asInt
 import moe.lava.banksia.core.model.Route
 import moe.lava.banksia.core.model.RouteType
 import moe.lava.banksia.core.model.Service
@@ -25,6 +26,8 @@ import moe.lava.banksia.core.model.ServiceException
 import moe.lava.banksia.core.model.Shape
 import moe.lava.banksia.core.model.Stop
 import moe.lava.banksia.core.model.StopTime
+import moe.lava.banksia.core.model.StoppingPattern
+import moe.lava.banksia.core.model.TimeType
 import moe.lava.banksia.core.model.Trip
 import moe.lava.banksia.core.util.Point
 import moe.lava.banksia.server.gtfs.structures.GtfsRoute
@@ -35,6 +38,8 @@ import moe.lava.banksia.server.gtfs.structures.GtfsStop
 import moe.lava.banksia.server.gtfs.structures.GtfsStopTime
 import moe.lava.banksia.server.gtfs.structures.GtfsTrip
 import java.io.File
+import java.nio.ByteBuffer
+import java.security.MessageDigest
 import java.util.zip.ZipFile
 import kotlin.time.ExperimentalTime
 
@@ -46,8 +51,7 @@ sealed class GtfsData {
     data class ServiceExceptionChunk(val exceptions: List<ServiceException>) : GtfsData()
     data class ShapeChunk(val shapes: List<Shape>) : GtfsData()
     data class StopChunk(val stops: List<Stop>) : GtfsData()
-    data class StopTimeChunk(val stopTimes: List<StopTime>) : GtfsData()
-    data class TripChunk(val trips: List<Trip>) : GtfsData()
+    data class TripChunk(val trips: List<Trip.Undated>) : GtfsData()
 }
 
 class GtfsParser(
@@ -129,7 +133,6 @@ class GtfsParser(
             .filter { it.name == "trips.txt" }
             .flatMap { fd ->
                 parseTrips(fd, services)
-                    .also { emit(GtfsData.TripChunk(it)) }
             }
             .associateBy { it.id }
 
@@ -137,12 +140,52 @@ class GtfsParser(
             .filter { it.name == "stop_times.txt" }
             .forEach { fd ->
                 log.info("parsing stop times for ${fd.parent}...")
-                parseStopTimes(fd, trips) { seq ->
-                    seq.chunked(1000000)
-                        .forEach { emit(GtfsData.StopTimeChunk(it)) }
+                parseStopTimes(fd) { seq ->
+                    val times = ArrayList<Pair<String, StopTime.Undated>>(1000100)
+                    seq.forEach { pair ->
+                        val (_, stoptime) = pair
+                        if (times.size > 1000000 && stoptime.patternId == 1L) {
+                            emit(GtfsData.TripChunk(processStoptimes(trips, times)))
+                            times.clear()
+                        }
+
+                        times.add(pair)
+                    }
+                    emit(GtfsData.TripChunk(processStoptimes(trips, times)))
                 }
             }
     }
+
+    private fun hashCalc(headsign: String, stops: List<StopTime.Undated>): Long {
+        val inst = MessageDigest.getInstance("SHA-256")
+        inst.update(headsign.toByteArray())
+        stops.forEach {
+            inst.update(it.stopId.toByteArray())
+            val dint = it.time.departure.asInt()
+            inst.update((dint).toByte())
+            inst.update((dint shr 8).toByte())
+            val aint = it.time.arrival.asInt()
+            inst.update((aint).toByte())
+            inst.update((aint shr 8).toByte())
+        }
+
+        val buf = inst.digest().slice(0..7).toByteArray()
+        buf[0] = 0
+        buf[1] = 0
+        return ByteBuffer.wrap(buf).long
+    }
+
+    private fun processStoptimes(trips: Map<String, Trip.Undated>, times: ArrayList<Pair<String, StopTime.Undated>>) =
+        times.groupBy { it.first }
+            .map { (tripId, pairs) ->
+                val trip = trips[tripId]!!
+                val stoptimes = pairs.map { it.second }
+                val hash = hashCalc(trip.pattern.headsign, stoptimes)
+                trip.copy(pattern = trip.pattern.copy(
+                    id = hash,
+                    stoptimes = stoptimes.map { it.copy(patternId = hash) }
+                ))
+            }
 
     private fun parseRoutes(fd: File) =
         fd.parseCsv<GtfsRoute>()
@@ -180,16 +223,17 @@ class GtfsParser(
                 )
             } }
 
-    private inline fun parseStopTimes(fd: File, trips: Map<String, Trip>, block: (Sequence<StopTime>) -> Unit) =
+    private inline fun parseStopTimes(fd: File, block: (Sequence<Pair<String, StopTime.Undated>>) -> Unit) =
         fd.parseCsvSequence<GtfsStopTime> { seq ->
             seq
                 .map { with(it) {
-                    StopTime(
-                        tripId = trip_id,
+                    it.trip_id to StopTime(
+                        patternId = stop_sequence,
                         stopId = stop_id,
-                        arrivalTime = GtfsStopTime.parseGtfsTime(arrival_time),
-                        departureTime = GtfsStopTime.parseGtfsTime(departure_time),
-                        headsign = stop_headsign.ifEmpty { trips[trip_id]!!.tripHeadsign },
+                        time = TimeType.Undated(
+                            arrival = GtfsStopTime.parseGtfsTime(arrival_time),
+                            departure = GtfsStopTime.parseGtfsTime(departure_time),
+                        ),
                         pickupType = pickup_type,
                         dropOffType = drop_off_type,
                     )
@@ -230,15 +274,19 @@ class GtfsParser(
     private fun parseTrips(fd: File, services: Map<String, Service>) =
         fd.parseCsv<GtfsTrip>()
             .map { with(it) {
-                Trip(
+                Trip.Undated(
                     id = trip_id,
-                    routeId = route_id,
+                    pattern = StoppingPattern(
+                        id = 0,
+                        routeId = route_id,
+                        shapeId = shape_id,
+                        headsign = trip_headsign,
+                        wheelchairAccessible = wheelchair_accessible == "1",
+                        stoptimes = listOf()
+                    ),
                     service = services["${fd.parentFile.name}_${service_id}"]!!,
-                    shapeId = shape_id,
-                    tripHeadsign = trip_headsign,
-                    directionId = direction_id,
+                    directionId = direction_id.toInt(),
                     blockId = block_id.ifEmpty { null },
-                    wheelchairAccessible = wheelchair_accessible == "1",
                 )
             } }
 
